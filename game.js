@@ -5,17 +5,16 @@ const firstRow = 38;
 const blockSize = 2.5;
 const playerSize = vec2(1.4,2);
 
-let lines = [0, 0, 0, 0, 0, 0, 0, 0]; // the vertical lines
-let score=0;
-let T=0;
-let player;
-let state;
-let lostTimer;
-
-// colors
 const bgColor = new Color(0.2, 0.0, 0.2);
 const playerColor = new Color(0.3, 1, 1);
 const bulletColor = new Color(0.3, 1, 1);
+
+let lines = new Array(8).fill(0); // the vertical lines
+let score=0;
+let T=0;
+let state;
+let lostTimer;
+let player;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -23,25 +22,12 @@ function gameInit() {
 
     lostTimer = new Timer;
 
-    state = "splash";
+    state = "play";
     player = new Player(10);
-}
-
-function resetGame() {
-    score = 0;
-    lines = [0, 0, 0, 0, 0, 0, 0, 0];
-}
-
-function spawnBlock() {
-    const col = randInt(0, 8);
-    lines[col]++;
-    new Block(col*blockSize+blockSize/2, firstRow-lines[col]*blockSize, lines[col]);
 }
 
 function gameUpdate() {
     T++;
-    // called every frame at 60 frames per second
-    // handle input and update the game state
 
     switch (state) {
         case "splash":
@@ -51,19 +37,7 @@ function gameUpdate() {
             }
             break;
         case "play":
-            if (mouseWasPressed(0) || keyWasPressed(32)) { // if there is no ball and left mouse is pressed
-                new Bullet(player.pos.x, player.pos.y);
-            }
-            if (T/randInt(6,3)%10 === 0) {
-                spawnBlock();
-            }
-
-            for (let i=0; i<lines.length; i++) {
-                if (lines[i] > 12) {
-                    lostTimer.set(0.1);
-                    state = "lost";
-                }
-            }
+            play();
             break;
         case "lost":
             lostScreen();

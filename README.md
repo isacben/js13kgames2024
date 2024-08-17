@@ -19,7 +19,7 @@ HUD
 
 Gameplay
 
-- [ ] implement good way to spanw blocks
+- [-] implement good way to spanw blocks
 - [ ] particles when removing blocks
 - [ ] particles when hitting a block
 - [ ] add hard block

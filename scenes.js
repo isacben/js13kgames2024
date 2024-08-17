@@ -4,6 +4,23 @@ function splashScreen() {
     drawTextScreen("Welcome", vec2(mainCanvasSize.x/2, mainCanvasSize.y/2), 50);
 }
 
+function play() {
+    if (mouseWasPressed(0) || keyWasPressed(32)) {
+        new Bullet(player.pos.x, player.pos.y);
+    }
+
+    if (T/randInt(6,3)%10 === 0) {
+        spawnBlock();
+    }
+
+    for (let i=0; i<lines.length; i++) {
+        if (lines[i] > 2) {
+            lostTimer.set(0.1);
+            state = "lost";
+        }
+    }
+}
+
 function lostScreen() {
 
     if (lostTimer.isSet()) {
