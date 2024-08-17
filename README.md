@@ -2,9 +2,10 @@
 
 General
 
-- [ ] replace player with triangle
+- [x] replace player with triangle
 - [ ] select color pallet
-- [ ] replace bullets
+- [x] replace bullets
+- [ ] muscle flash
 
 HUD
 

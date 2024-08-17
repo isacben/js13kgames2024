@@ -11,7 +11,7 @@ class Block extends EngineObject {
     render() {
         //drawRect(this.pos, this.size, new Color(.1,.1,.1)); // for border
         drawRect(this.pos, this.size, new Color(0.3,1.0,1.0)); // for border
-        drawRect(this.pos, vec2(blockSize*0.95,blockSize*0.95), bg); // block color
+        drawRect(this.pos, vec2(blockSize*0.95,blockSize*0.95), bgColor); // block color
         drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, new Color(0.6, 0.2, 1)); // block number
     }
 

@@ -4,7 +4,7 @@ class Player extends EngineObject {
     constructor(posX) {
         super(vec2(posX, 1.5), playerSize, tile(0)); // set object position and size
         this.setCollision();
-        this.color = new Color(1,1,0);
+        this.color = playerColor;
     }
 
     collideWithObject(o) {

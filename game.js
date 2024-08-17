@@ -3,7 +3,7 @@
 const levelSize = vec2(20, 40); // size of play area
 const firstRow = 38;
 const blockSize = 2.5;
-const playerSize = vec2(2);
+const playerSize = vec2(1.4,2);
 
 let lines = [0, 0, 0, 0, 0, 0, 0, 0]; // the vertical lines
 let score=0;
@@ -12,7 +12,10 @@ let player;
 let state;
 let lostTimer;
 
-let bg = new Color(0.2, 0.0, 0.2);
+// colors
+const bgColor = new Color(0.2, 0.0, 0.2);
+const playerColor = new Color(0.3, 1, 1);
+const bulletColor = new Color(0.3, 1, 1);
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -79,7 +82,7 @@ function gameRender()
     // called before objects are rendered
     // draw any background effects that appear behind objects
     drawRect(cameraPos, vec2(50), new Color(.5,.5,.5)); // draw background
-    drawRect(cameraPos, levelSize, bg); // draw level boundary
+    drawRect(cameraPos, levelSize, bgColor); // draw level boundary
 }
 function gameRenderPost() {
     // called after objects are rendered

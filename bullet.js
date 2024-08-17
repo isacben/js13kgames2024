@@ -2,16 +2,19 @@
 
 class Bullet extends EngineObject {
     constructor(x, y) {
-        super(vec2(x, y), vec2(2), tile(0));
-        this.velocity = 1;
+        super(vec2(x, y + 1), vec2(1.2), tile(1));
+        this.velocity = vec2(0, 0.8);
+        this.color = bulletColor;
         this.setCollision();
     }
 
     update() {
-        this.pos.y += this.velocity;
         if (this.pos.y > 40) {
             this.destroy();
         }
+
+        // update physics
+        super.update();
     }
 
     collideWithObject(o) {
