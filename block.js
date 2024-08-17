@@ -2,9 +2,8 @@
 
 class Block extends EngineObject {
     constructor(posX, posY, num) {
-        super(vec2(posX, posY));
+        super(vec2(posX, posY), vec2(blockSize));
         this.setCollision();
-        this.size = vec2(blockSize);
         this.color = new Color (1, 0, 0)
         this.num = num;
     }
