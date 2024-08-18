@@ -10,9 +10,9 @@ class Block extends EngineObject {
 
     render() {
         //drawRect(this.pos, this.size, new Color(.1,.1,.1)); // for border
-        drawRect(this.pos, this.size, new Color(0.3,1.0,1.0)); // for border
+        drawRect(this.pos, this.size, blockColor); // for border
         drawRect(this.pos, vec2(blockSize*0.95,blockSize*0.95), bgColor); // block color
-        drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, new Color(0.6, 0.2, 1)); // block number
+        drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
     }
 
     collideWithObject(o) {
@@ -21,7 +21,7 @@ class Block extends EngineObject {
 
         // create hit effect
         if (this.num!=0) {
-            const color = this.color;
+            const color = blockColor;
             new ParticleEmitter(
                 this.pos.subtract(vec2(0,2)), PI,            // pos, angle
                 this.size, .1, 50, PI/2, // emitSize, emitTime, emitRate, emiteCone
@@ -40,7 +40,7 @@ class Block extends EngineObject {
             this.destroy();
 
             // create explosion effect
-            const color = this.color;
+            const color = blockColor;
             new ParticleEmitter(
                 this.pos, 0,            // pos, angle
                 this.size, .1, 200, PI, // emitSize, emitTime, emitRate, emiteCone

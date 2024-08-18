@@ -5,9 +5,11 @@ const firstRow = 38;
 const blockSize = 2.5;
 const playerSize = vec2(1.4,2);
 
-const bgColor = new Color(0.2, 0.0, 0.2);
-const playerColor = new Color(0.3, 1, 1);
-const bulletColor = new Color(0.3, 1, 1);
+const bgColor = new Color(0.047, 0.058, 0.039);
+const playerColor = new Color(0.254, 0.917, 0.831);
+const blockColor = new Color(1, 0.125, 0.431);
+const bulletColor = new Color(0.984, 1, 0.07);
+const textColor = playerColor;
 
 let lines = new Array(8).fill(0); // the vertical lines
 let score=0;

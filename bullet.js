@@ -2,7 +2,7 @@
 
 class Bullet extends EngineObject {
     constructor(x, y) {
-        super(vec2(x, y + 1), vec2(1.2), tile(1));
+        super(vec2(x, y + 1), vec2(1), tile(1));
         this.velocity = vec2(0, 0.8);
         this.color = bulletColor;
         this.setCollision();

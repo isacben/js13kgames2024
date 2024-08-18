@@ -11,6 +11,7 @@ HUD
 
 - [ ] screen frame should be one or two neon lines
 - [ ] fix score
+- [ ] add points flying up when hitting/destroying blocks
 - [ ] enhance gameover animation
 - [ ] add gameover screen
     - [ ] all blocks become 13
