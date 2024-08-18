@@ -34,7 +34,7 @@ class Block extends EngineObject {
             );
         }
 
-        if (this.num < 1) {
+        if (this.num < 1 || o.type === "hard") {
             // this is how we calculate the column
             lines[(this.pos.x - blockSize/2) / blockSize]--;
             this.destroy();
@@ -52,6 +52,6 @@ class Block extends EngineObject {
                 .1, .5, 0, 1        // fade, randomness, collide, additive
             );
         }
-        return 0;
+        return 1;
     }
 }

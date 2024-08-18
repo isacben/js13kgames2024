@@ -6,7 +6,7 @@ function splashScreen() {
 
 function play() {
     if (mouseWasPressed(0) || keyWasPressed(32)) {
-        new Bullet(player.pos.x, player.pos.y);
+        new Bullet(player.pos.x, player.pos.y, "hard");
     }
 
     if (!spawnBlockTimer.isSet()){
