@@ -9,12 +9,13 @@ function play() {
         new Bullet(player.pos.x, player.pos.y);
     }
 
-    if (T/randInt(6,3)%10 === 0) {
-        spawnBlock();
+    if (!spawnBlockTimer.isSet()){
+        spawnBlockTimer.set(1);
     }
+    spawnBlock();
 
     for (let i=0; i<lines.length; i++) {
-        if (lines[i] > 2) {
+        if (lines[i] > 12) {
             lostTimer.set(0.1);
             state = "lost";
         }

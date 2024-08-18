@@ -6,7 +6,11 @@ function resetGame() {
 }
 
 function spawnBlock() {
-    const col = randInt(0, 8);
-    lines[col]++;
-    new Block(col*blockSize+blockSize/2, firstRow-lines[col]*blockSize, lines[col]);
+    if (spawnBlockTimer.elapsed()) {
+        const col = randInt(0, 8);
+        lines[col]++;
+        new Block(col*blockSize+blockSize/2, firstRow-lines[col]*blockSize, lines[col]);
+
+        spawnBlockTimer.set(rand(0.1, 0.8));
+    }
 }

@@ -14,6 +14,7 @@ let score=0;
 let T=0;
 let state;
 let lostTimer;
+let spawnBlockTimer;
 let player;
 
 function gameInit() {
@@ -21,6 +22,7 @@ function gameInit() {
     canvasFixedSize = vec2(720, 1280); // use a 720p fixed size canvas
 
     lostTimer = new Timer;
+    spawnBlockTimer = new Timer;
 
     state = "play";
     player = new Player(10);
