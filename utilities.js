@@ -14,3 +14,7 @@ function spawnBlock() {
         spawnBlockTimer.set(rand(0.1, 0.8));
     }
 }
+
+function fire() {
+    new Bullet(player.pos.x, player.pos.y, "hard");
+}
