@@ -1,9 +1,9 @@
 'use strict';
 
 class Bullet extends EngineObject {
-    constructor(x, y, type="normal") {
+    constructor(x, y, velocity=vec2(0, 0.8), type="normal") {
         super(vec2(x, y + 1), vec2(1), tile(1));
-        this.velocity = vec2(0, 0.8);
+        this.velocity = velocity;
         this.color = bulletColor;
         this.type = type;
         this.setCollision();
@@ -33,9 +33,10 @@ class Bullet extends EngineObject {
     }
 
     collideWithObject(o) {
-        if (this.type === "normal"){
+        if (this.type === "normal" && o.constructor.name === "Block"){
             this.destroy();
         }
+
         return 0;
     }
 }
