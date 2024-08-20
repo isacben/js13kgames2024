@@ -19,8 +19,9 @@ function spawnBlock() {
 
         const pos = l2.length + 1;
         console.log(pos);
-        l2.push(new Block(1*blockSize+blockSize/2, firstRow+3-pos*blockSize, pos, pos));
+        l2.push(new Block(1*blockSize+blockSize/2, firstRow+2.5-pos*blockSize, pos, pos));
         spawnBlockTimer.set(rand(0.5, 1.8));
+        //spawnBlockTimer.set(rand(0.5, 1.8));
     }
 }
 

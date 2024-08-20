@@ -7,7 +7,9 @@ class Block extends EngineObject {
         this.mass = 1;
         this.friction = 1;
         this.elasticity = 0;
-        this.collideTiles = false;
+        this.collideTiles = true;
+        this.collideSolidObjects = true;
+        this.isSolid = true;
         this.color = new Color (.5, 0, 0)
         this.num = num;
         this.levelPos = levelPos;
@@ -21,17 +23,19 @@ class Block extends EngineObject {
     }
 
     update() {
-        if (this.pos.y >= firstRow) {
+        if (this.pos.y <= firstRow) {
+            this.velocity = vec2(0, .1);
+        }
+        else if (this.pos.y >= firstRow) {
             this.velocity = vec2(0);
         }
-        if (this.pos.y < firstRow)
-            this.velocity = vec2(0, .2);
 
         super.update();
     }
 
     collideWithObject(o) {
         if (o.constructor.name === "Block") {
+            this.velocity = vec2(0);
             return 1;
         }
 
