@@ -13,6 +13,7 @@ function play() {
         spawnBlockTimer.set(1);
     }
     spawnBlock();
+    //moveBlocks();
 
     for (let i=0; i<lines.length; i++) {
         if (lines[i] > 12) {
