@@ -1,10 +1,10 @@
 'use strict';
 
 class Block extends EngineObject {
-    constructor(posX, posY, num, levelPos) {
+    constructor(posX, posY, num, levelPos, levelCol) {
         super(vec2(posX, posY), vec2(blockSize));
         this.setCollision();
-        this.mass = 1;
+        this.mass = 0;
         this.friction = 1;
         this.elasticity = 0;
         this.collideTiles = true;
@@ -13,6 +13,7 @@ class Block extends EngineObject {
         this.color = new Color (.5, 0, 0)
         this.num = num;
         this.levelPos = levelPos;
+        this.levelCol = levelCol;
     }
 
     render() {
@@ -22,16 +23,16 @@ class Block extends EngineObject {
         drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
     }
 
-    update() {
-        if (this.pos.y <= firstRow) {
-            this.velocity = vec2(0, .1);
-        }
-        else if (this.pos.y >= firstRow) {
-            this.velocity = vec2(0);
-        }
+   // update() {
+   //     if (this.pos.y <= firstRow) {
+   //         this.velocity = vec2(0, 1);
+   //     }
+   //     else if (this.pos.y >= firstRow) {
+   //         this.velocity = vec2(0);
+   //     }
 
-        super.update();
-    }
+   //     super.update();
+   // }
 
     collideWithObject(o) {
         if (o.constructor.name === "Block") {
@@ -61,9 +62,10 @@ class Block extends EngineObject {
             // this is how we calculate the column
             lines[(this.pos.x - blockSize/2) / blockSize]--;
             //level[this.levelPos] = null;
-            const index = l2.indexOf(this);
+
+            const index = level[this.levelCol].indexOf(this);
             if (index > -1) { // only splice array when item is found
-                l2.splice(index, 1); // 2nd parameter means remove one item only
+                level[this.levelCol].splice(index, 1); // 2nd parameter means remove one item only
             }
 
             this.destroy();

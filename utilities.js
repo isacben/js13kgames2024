@@ -17,22 +17,22 @@ function spawnBlock() {
         //    }
         //}
 
-        const pos = l2.length + 1;
-        console.log(pos);
-        l2.push(new Block(1*blockSize+blockSize/2, firstRow+2.5-pos*blockSize, pos, pos));
+        
+        const pos = level[col].length + 1;
+        const x = col*blockSize+blockSize/2;
+        const y = firstRow-pos*blockSize;
+        level[col].push(new Block(x, y, pos, pos-1, col));
+        //spawnBlockTimer.set(rand(0.1, .8));
         spawnBlockTimer.set(rand(0.5, 1.8));
-        //spawnBlockTimer.set(rand(0.5, 1.8));
     }
 }
 
 function moveBlocks() {
+    const lines2 = [l1, l2, l3, l4, l5, l6, l7, l8];
     for (let col=0; col<8; col++)
-    for (let row=1; row<13; row++) {
-        if (level[(row-1)*8 + col] === null && level[row*8 + col]) {
-            level[(row-1)*8 + col] = level[row*8 + col];
-            level[row*8 + col] = null;
-            level[(row-1)*8 + col].pos.y = firstRow-(row)*blockSize; 
-        }
+    for (let row=0; row<level[col].length; row++) {
+        //level[(row-1)*8 + col].pos.y = firstRow-(row)*blockSize; 
+        level[col][row].pos.y = firstRow-(row)*blockSize; 
     }
 }
 

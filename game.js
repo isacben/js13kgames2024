@@ -24,7 +24,7 @@ function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
     canvasFixedSize = vec2(720, 1280); // use a 720p fixed size canvas
 
-    level = new Array(103).fill(null);
+    level = [[], [], [], [], [], [], [], []];
     l1 = l2 = l3 = l4 = l5 = l6 = l7 = l8 = [];
 
     lostTimer = new Timer;
