@@ -26,7 +26,7 @@ class Block extends EngineObject
             return 1;
         }
 
-        ++score
+        score += 1000 * this.num
         this.num -= 1;
 
         // create hit effect

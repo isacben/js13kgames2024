@@ -24,7 +24,7 @@ function gameInit() {
     lostTimer = new Timer;
     spawnBlockTimer = new Timer;
 
-    state = "splash";
+    state = "play";
     player = new Player(18);
 }
 
@@ -68,7 +68,7 @@ function gameRenderPost() {
             splashScreen();
             break;
         case "play":
-            drawTextScreen("Score " + score, vec2(mainCanvasSize.x/2, 70), 50);
+            drawTextScreen(score, vec2(mainCanvasSize.x - 70, 70), 40, playerColor, "left");
             break;
     }
 }
