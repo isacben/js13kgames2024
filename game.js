@@ -11,12 +11,7 @@ const blockColor = new Color(1, 0.125, 0.431);
 const bulletColor = new Color(0.984, 1, 0.07);
 const textColor = playerColor;
 
-let level;
-let score;
-let state;
-let lostTimer;
-let spawnBlockTimer;
-let player;
+let level, score, state, lostTimer, spawnBlockTimer, player;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -30,7 +25,7 @@ function gameInit() {
     spawnBlockTimer = new Timer;
 
     state = "play";
-    player = new Player(10);
+    player = new Player(18);
 }
 
 function gameUpdate() {

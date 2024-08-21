@@ -8,11 +8,12 @@ function spawnBlock() {
     if (spawnBlockTimer.elapsed()) {
         const col = randInt(0, 8);
         const pos = level[col].length + 1;
-        const x = col*blockSize+blockSize/2;
-        const y = firstRow-pos*blockSize;
-        level[col].push(new Block(x, y, pos, pos-1, col));
-        //spawnBlockTimer.set(rand(0.1, .8));
-        spawnBlockTimer.set(rand(0.5, 1.8));
+        const x = col * blockSize + blockSize / 2;
+        const y = firstRow - pos * blockSize;
+
+        level[col].push(new Block(vec2(x, y), pos, col));
+
+        spawnBlockTimer.set(rand(0.1, .8));
     }
 }
 

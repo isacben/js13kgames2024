@@ -34,7 +34,8 @@ Gameplay
 - [ ] support powerful bullets
     - [x] destroy multiple blocks
     - [x] spread bullets
-- [ ] fix bug: overlapping blocks, and blocks spwanning in the middle of the column
+- [x] fix bug: overlapping blocks, and blocks spwanning in the middle of the column
+- [ ] destroy bullets when they hit the walls
 
 Sound
 

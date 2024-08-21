@@ -1,23 +1,20 @@
 'use strict';
 
-class Block extends EngineObject {
-    constructor(posX, posY, num, levelPos, levelCol) {
-        super(vec2(posX, posY), vec2(blockSize));
+class Block extends EngineObject
+{
+    /** Create a random number generator with the seed passed in
+     *  @param {Vector2} pos - World space position of the block
+     *  @param {Number} num - Health value for the block
+     *  @param {Number} levelCol - Column the block is positioned in the level array */
+    constructor(pos, num, levelCol)
+    {
+        super(pos, vec2(blockSize));
         this.setCollision();
-        this.mass = 0;
-        this.friction = 1;
-        this.elasticity = 0;
-        this.collideTiles = true;
-        this.collideSolidObjects = true;
-        this.isSolid = true;
-        this.color = new Color (.5, 0, 0)
         this.num = num;
-        this.levelPos = levelPos;
         this.levelCol = levelCol;
     }
 
     render() {
-        //drawRect(this.pos, this.size, new Color(.1,.1,.1)); // for border
         drawRect(this.pos, this.size, blockColor); // for border
         drawRect(this.pos, vec2(blockSize*0.95,blockSize*0.95), bgColor); // block color
         drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
@@ -50,7 +47,6 @@ class Block extends EngineObject {
         if ((this.num < 1 || o.type === "hard")) {
             // this is how we calculate the column
             //lines[(this.pos.x - blockSize/2) / blockSize]--;
-            //level[this.levelPos] = null;
 
             const index = level[this.levelCol].indexOf(this);
             if (index > -1) { // only splice array when item is found
