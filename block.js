@@ -23,17 +23,6 @@ class Block extends EngineObject {
         drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
     }
 
-   // update() {
-   //     if (this.pos.y <= firstRow) {
-   //         this.velocity = vec2(0, 1);
-   //     }
-   //     else if (this.pos.y >= firstRow) {
-   //         this.velocity = vec2(0);
-   //     }
-
-   //     super.update();
-   // }
-
     collideWithObject(o) {
         if (o.constructor.name === "Block") {
             this.velocity = vec2(0);
@@ -60,7 +49,7 @@ class Block extends EngineObject {
 
         if ((this.num < 1 || o.type === "hard")) {
             // this is how we calculate the column
-            lines[(this.pos.x - blockSize/2) / blockSize]--;
+            //lines[(this.pos.x - blockSize/2) / blockSize]--;
             //level[this.levelPos] = null;
 
             const index = level[this.levelCol].indexOf(this);
@@ -84,6 +73,5 @@ class Block extends EngineObject {
             );
         }
         return 1;
-    
     }
 }

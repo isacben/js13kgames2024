@@ -11,10 +11,8 @@ const blockColor = new Color(1, 0.125, 0.431);
 const bulletColor = new Color(0.984, 1, 0.07);
 const textColor = playerColor;
 
-let lines = new Array(8).fill(0); // the vertical lines
-let level, l1, l2, l3, l4, l5, l6, l7, l8;
-let score=0;
-let T=0;
+let level;
+let score;
 let state;
 let lostTimer;
 let spawnBlockTimer;
@@ -24,9 +22,10 @@ function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
     canvasFixedSize = vec2(720, 1280); // use a 720p fixed size canvas
 
-    level = [[], [], [], [], [], [], [], []];
-    l1 = l2 = l3 = l4 = l5 = l6 = l7 = l8 = [];
+    // same as: level = [[], [], [], [], [], [], [], []];
+    level = Array.from(Array(8), () => []);
 
+    score = 0;
     lostTimer = new Timer;
     spawnBlockTimer = new Timer;
 
@@ -35,8 +34,6 @@ function gameInit() {
 }
 
 function gameUpdate() {
-    T++;
-
     switch (state) {
         case "splash":
             splashScreen();
