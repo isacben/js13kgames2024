@@ -1,8 +1,13 @@
 'use strict';
 
-class Bullet extends EngineObject {
-    constructor(x, y, velocity=vec2(0, 0.8), type="normal") {
-        super(vec2(x, y + 1), vec2(1), tile(1));
+class Bullet extends EngineObject
+{
+    /** Create a bullet
+     *  @param {Vector2} pos - World space position of the bullet
+     *  @param {Vector2} direction - Direction vector of the bullet
+     *  @param {String} type - Type of bullet (normal/hard) */
+    constructor(pos, velocity=vec2(0, 0.8), type="normal") {
+        super(vec2(pos.x, pos.y + 1), vec2(1), tile(1));
         this.velocity = velocity;
         this.color = bulletColor;
         this.type = type;

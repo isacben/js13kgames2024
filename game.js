@@ -1,7 +1,7 @@
 'use strict';
 
 const levelSize = vec2(20, 40); // size of play area
-const firstRow = 34;
+const firstRow = 35;
 const blockSize = 2.5;
 const playerSize = vec2(1.4,2);
 
@@ -24,7 +24,7 @@ function gameInit() {
     lostTimer = new Timer;
     spawnBlockTimer = new Timer;
 
-    state = "play";
+    state = "splash";
     player = new Player(18);
 }
 
@@ -55,8 +55,10 @@ function gameRender()
 {
     // called before objects are rendered
     // draw any background effects that appear behind objects
-    drawRect(cameraPos, vec2(50), new Color(.5,.5,.5)); // draw background
-    drawRect(cameraPos, levelSize, bgColor); // draw level boundary
+    drawRect(cameraPos, vec2(21.1,50), playerColor); // draw external border 
+    drawRect(cameraPos, vec2(21,50), bgColor); // draw black area between borders border
+    drawRect(cameraPos, vec2(20.2,50), blockColor); // draw internal border 
+    drawRect(cameraPos, vec2(20.1,50), bgColor); // draw internal black border 
 }
 function gameRenderPost() {
     // called after objects are rendered

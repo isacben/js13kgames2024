@@ -2,7 +2,7 @@
 
 class Block extends EngineObject
 {
-    /** Create a random number generator with the seed passed in
+    /** Create a block
      *  @param {Vector2} pos - World space position of the block
      *  @param {Number} num - Health value for the block
      *  @param {Number} levelCol - Column the block is positioned in the level array */
