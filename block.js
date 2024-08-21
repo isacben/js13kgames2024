@@ -1,21 +1,31 @@
 'use strict';
 
-class Block extends EngineObject {
-    constructor(posX, posY, num) {
-        super(vec2(posX, posY), vec2(blockSize));
+class Block extends EngineObject
+{
+    /** Create a random number generator with the seed passed in
+     *  @param {Vector2} pos - World space position of the block
+     *  @param {Number} num - Health value for the block
+     *  @param {Number} levelCol - Column the block is positioned in the level array */
+    constructor(pos, num, levelCol)
+    {
+        super(pos, vec2(blockSize));
         this.setCollision();
-        this.color = new Color (.5, 0, 0)
         this.num = num;
+        this.levelCol = levelCol;
     }
 
     render() {
-        //drawRect(this.pos, this.size, new Color(.1,.1,.1)); // for border
         drawRect(this.pos, this.size, blockColor); // for border
         drawRect(this.pos, vec2(blockSize*0.95,blockSize*0.95), bgColor); // block color
         drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
     }
 
     collideWithObject(o) {
+        if (o.constructor.name === "Block") {
+            this.velocity = vec2(0);
+            return 1;
+        }
+
         ++score
         this.num -= 1;
 
@@ -34,9 +44,15 @@ class Block extends EngineObject {
             );
         }
 
-        if (this.num < 1 || o.type === "hard") {
+        if ((this.num < 1 || o.type === "hard")) {
             // this is how we calculate the column
-            lines[(this.pos.x - blockSize/2) / blockSize]--;
+            //lines[(this.pos.x - blockSize/2) / blockSize]--;
+
+            const index = level[this.levelCol].indexOf(this);
+            if (index > -1) { // only splice array when item is found
+                level[this.levelCol].splice(index, 1); // 2nd parameter means remove one item only
+            }
+
             this.destroy();
 
             // create explosion effect

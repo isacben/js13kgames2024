@@ -1,7 +1,7 @@
 'use strict';
 
 const levelSize = vec2(20, 40); // size of play area
-const firstRow = 38;
+const firstRow = 34;
 const blockSize = 2.5;
 const playerSize = vec2(1.4,2);
 
@@ -11,28 +11,24 @@ const blockColor = new Color(1, 0.125, 0.431);
 const bulletColor = new Color(0.984, 1, 0.07);
 const textColor = playerColor;
 
-let lines = new Array(8).fill(0); // the vertical lines
-let score=0;
-let T=0;
-let state;
-let lostTimer;
-let spawnBlockTimer;
-let player;
+let level, score, state, lostTimer, spawnBlockTimer, player;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
     canvasFixedSize = vec2(720, 1280); // use a 720p fixed size canvas
 
+    // same as: level = [[], [], [], [], [], [], [], []];
+    level = Array.from(Array(8), () => []);
+
+    score = 0;
     lostTimer = new Timer;
     spawnBlockTimer = new Timer;
 
     state = "play";
-    player = new Player(10);
+    player = new Player(18);
 }
 
 function gameUpdate() {
-    T++;
-
     switch (state) {
         case "splash":
             splashScreen();

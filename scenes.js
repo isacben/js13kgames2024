@@ -13,9 +13,11 @@ function play() {
         spawnBlockTimer.set(1);
     }
     spawnBlock();
+    moveBlocks();
 
-    for (let i=0; i<lines.length; i++) {
-        if (lines[i] > 12) {
+    // game over condition
+    for (let i=0; i<8; i++) {
+        if (level[i].length > 12) {
             lostTimer.set(0.1);
             state = "lost";
         }

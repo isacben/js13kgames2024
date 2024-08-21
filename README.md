@@ -32,7 +32,10 @@ Gameplay
 - [ ] add hard block
 - [ ] add falling blocks
 - [ ] support powerful bullets
-    - [ ] destroy multiple blocks
+    - [x] destroy multiple blocks
+    - [x] spread bullets
+- [x] fix bug: overlapping blocks, and blocks spwanning in the middle of the column
+- [ ] destroy bullets when they hit the walls
 
 Sound
 
