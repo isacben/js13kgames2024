@@ -63,9 +63,9 @@ class Block extends EngineObject
                 0,                      // tileInfo
                 color, color,                       // colorStartA, colorStartB
                 color.scale(1,0), color.scale(1,0), // colorEndA, colorEndB
-                .2, .5, 1, .1, .1,  // time, sizeStart, sizeEnd, speed, angleSpeed
+                .2, .5, 1, .08, .1,  // time, sizeStart, sizeEnd, speed, angleSpeed
                 .99, .95, .4, PI,   // damp, angleDamp, gravity, cone
-                .1, .5, 0, 1        // fade, randomness, collide, additive
+                .1, .8, 0, 1        // fade, randomness, collide, additive
             );
         }
         return 1;

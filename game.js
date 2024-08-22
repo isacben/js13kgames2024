@@ -68,7 +68,13 @@ function gameRenderPost() {
             splashScreen();
             break;
         case "play":
-            drawTextScreen(score, vec2(mainCanvasSize.x - 70, 70), 40, playerColor, "left");
+            drawTextScreen(
+                score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
+                vec2(mainCanvasSize.x - 55, 65),
+                50, playerColor,
+                undefined, undefined,
+                "right"
+            );
             break;
     }
 }
