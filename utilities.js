@@ -25,8 +25,8 @@ function moveBlocks() {
 }
 
 function fire() {
-    //new Bullet(player.pos, "hard");
-    for (let i=-.3; i<=.3; i+=.3) {
-        new Bullet(player.pos, vec2(i, 1));
+    //new Bullet(player.pos, vec2(0, 0.6), "hard");
+    for (let i=-.2; i<=.2; i+=.2) {
+        new Bullet(player.pos, vec2(i, .8));
     }
 }

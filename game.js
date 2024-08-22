@@ -26,6 +26,9 @@ function gameInit() {
 
     state = "play";
     player = new Player(18);
+
+    new Wall(vec2(-.5,0), vec2(1,80)) // left
+    new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
 }
 
 function gameUpdate() {
