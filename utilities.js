@@ -30,8 +30,8 @@ function fire() {
         return 0;
     }
 
-    if (powerUp > 10) { // hard bullet
-        new Bullet(player.pos, "hard");
+    if (powerUp >= 10) { // hard bullet
+        new Bullet(player.pos, vec2(0, 0.8), "hard");
         powerUp -= 10;
         return 0;
     }
