@@ -11,10 +11,10 @@ class Player extends EngineObject
         this.color = playerColor;
     }
 
-    collideWithObject(o) {
-        this.destroy();
-        return 1;
-    }
+    //collideWithObject(o) {
+    //    this.destroy();
+    //    return 1;
+    //}
 
     update() {
         this.pos.x = lerp(0.1, this.pos.x, mousePos.x); // move paddle to mouse

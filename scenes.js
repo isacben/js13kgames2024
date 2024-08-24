@@ -15,6 +15,11 @@ function playScene() {
     spawnBlock();
     moveBlocks();
 
+    if (!diamondTimer.isSet()) {
+        diamondTimer.set(2);
+    }
+    spawnDiamond();
+
     // game over condition
     for (let i=0; i<8; i++) {
         if (level[i].length > 12) {

@@ -43,3 +43,11 @@ function fire() {
     powerUp--;
     return 0;
 }
+
+function spawnDiamond() {
+    if (diamondTimer.elapsed()) {
+        const x = randInt(1, 15);
+        new Diamond(vec2(x, 41));
+        diamondTimer.set(2);
+    }
+}
