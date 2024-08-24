@@ -10,7 +10,7 @@ General
 HUD
 
 - [x] screen frame should be one or two neon lines
-- [ ] fix score
+- [x] fix score design
 - [ ] add points flying up when hitting/destroying blocks
 - [ ] enhance gameover animation
 - [ ] add gameover screen
@@ -36,7 +36,7 @@ Gameplay
     - [x] spread bullets
     - [ ] add power ups that enable these types of bullets
 - [x] fix bug: overlapping blocks, and blocks spwanning in the middle of the column
-- [ ] destroy bullets when they hit the walls
+- [x] destroy bullets when they hit the walls
 
 Sound
 
