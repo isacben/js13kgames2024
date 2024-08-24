@@ -36,7 +36,7 @@ function lostScene() {
         }
     }
 
-    if (engineObjects.length === 3) { // player and walls
+    if (engineObjects.length < 4) {
         resetGame();
         state = "splash";
     }

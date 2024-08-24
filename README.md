@@ -6,6 +6,7 @@ General
 - [x] select color pallet
 - [x] replace bullets
 - [ ] muscle flash
+- [ ] clean Block class (physics code)
 
 HUD
 

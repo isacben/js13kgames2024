@@ -1,7 +1,9 @@
 'use strict';
 
 function resetGame() {
-    gameInit();
+    score = 0;
+    powerUp = 0;
+    level = Array.from(Array(8), () => []);
 }
 
 function spawnBlock() {
