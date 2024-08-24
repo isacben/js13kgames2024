@@ -11,7 +11,7 @@ const blockColor = new Color(1, 0.125, 0.431);
 const bulletColor = new Color(0.984, 1, 0.07);
 const textColor = playerColor;
 
-let level, score, state, lostTimer, spawnBlockTimer, player;
+let level, score, state, lostTimer, spawnBlockTimer, powerUp, player;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -26,6 +26,7 @@ function gameInit() {
 
     state = "play";
     player = new Player(18);
+    powerUp = 5;
 
     new Wall(vec2(-.5,0), vec2(1,80)) // left
     new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
@@ -34,16 +35,16 @@ function gameInit() {
 function gameUpdate() {
     switch (state) {
         case "splash":
-            splashScreen();
+            splashScene();
             if (keyWasPressed(13)) {
                 state = "play";
             }
             break;
         case "play":
-            play();
+            playScene();
             break;
         case "lost":
-            lostScreen();
+            lostScene();
             break;
     }
 }
@@ -68,7 +69,7 @@ function gameRenderPost() {
     // draw effects or hud that appear above all objects
     switch (state) {
         case "splash":
-            splashScreen();
+            splashScene();
             break;
         case "play":
             drawTextScreen(

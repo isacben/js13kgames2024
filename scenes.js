@@ -1,10 +1,10 @@
 'use strict';
 
-function splashScreen() {
+function splashScene() {
     drawTextScreen("Welcome", vec2(mainCanvasSize.x/2, mainCanvasSize.y/2), 50);
 }
 
-function play() {
+function playScene() {
     if (mouseWasPressed(0) || keyWasPressed(32)) {
         fire();
     }
@@ -24,7 +24,7 @@ function play() {
     }
 }
 
-function lostScreen() {
+function lostScene() {
 
     if (lostTimer.isSet()) {
         if (lostTimer.elapsed()) {
@@ -36,7 +36,7 @@ function lostScreen() {
         }
     }
 
-    if (engineObjects.length === 1) {
+    if (engineObjects.length === 3) { // player and walls
         resetGame();
         state = "splash";
     }

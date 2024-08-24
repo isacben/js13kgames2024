@@ -25,8 +25,19 @@ function moveBlocks() {
 }
 
 function fire() {
-    //new Bullet(player.pos, vec2(0, 0.6), "hard");
-    for (let i=-.2; i<=.2; i+=.2) {
-        new Bullet(player.pos, vec2(i, .8));
+    if (powerUp === 0) { // normal bullet
+        new Bullet(player.pos);
+        return 0;
     }
+
+    if (powerUp > 10) { // hard bullet
+        new Bullet(player.pos, "hard");
+        powerUp -= 10;
+        return 0;
+    }
+
+    for (let i=-.2; i<=.2; i+=.2) // spread attack 
+    new Bullet(player.pos, vec2(i, 1));
+    powerUp--;
+    return 0;
 }
