@@ -9,6 +9,7 @@ const bgColor = new Color(0.047, 0.058, 0.039);
 const playerColor = new Color(0.254, 0.917, 0.831);
 const blockColor = new Color(1, 0.125, 0.431);
 const bulletColor = new Color(0.984, 1, 0.07);
+const extraColor = new Color(0.568, 0.003, 0.968);
 const textColor = playerColor;
 
 let level, score, state, lostTimer, spawnBlockTimer, diamondTimer, powerUp, player;

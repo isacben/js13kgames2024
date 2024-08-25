@@ -7,14 +7,25 @@ class Diamond extends EngineObject
      *  @param {Vector2} pos - World space position of the bullet
      *  @param {Number} amount - Number of times the powerUp will be increased */
     constructor(pos, amount=1) {
-        super(pos, vec2(2), tile(0));
-        this.velocity = vec2(0, -.3);
-        this.color = playerColor;
+        super(pos, vec2(1.5), tile(2));
+        this.velocity = vec2(0, -.2);
+        this.color = new Color(0.254, 0.917, 0.831);
         this.amount = amount;
         this.renderOrder = 500;    
+    
+        this.glowTimer = new Timer(.4);
+        this.alphaChange = -.018;
     }
 
     update() {
+        if (this.glowTimer.isSet()) {
+            if (this.glowTimer.elapsed()) {
+                this.alphaChange *= -1;
+                this.glowTimer.set(.4);
+            }
+        }
+        this.color.a += this.alphaChange;
+
         if (this.pos.y < 2.5)
             this.setCollision();
 
