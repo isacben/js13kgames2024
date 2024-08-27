@@ -7,6 +7,10 @@ General
 - [x] replace bullets
 - [ ] muscle flash
 - [ ] clean Block class (physics code)
+- [ ] optimize for mobile
+    - place for the finger
+    - auto shooting?
+    - start button
 
 HUD
 

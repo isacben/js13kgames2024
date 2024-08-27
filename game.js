@@ -12,7 +12,7 @@ const bulletColor = new Color(0.984, 1, 0.07);
 const extraColor = new Color(0.568, 0.003, 0.968);
 const textColor = playerColor;
 
-let level, score, state, lostTimer, spawnBlockTimer, diamondTimer, powerUp, player;
+let level, score, state, lostTimer, spawnBlockTimer, diamondTimer, fireTimer, powerUp, player;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -25,6 +25,9 @@ function gameInit() {
     lostTimer = new Timer;
     spawnBlockTimer = new Timer;
     diamondTimer = new Timer;
+    fireTimer = new Timer;
+
+    touchGamepadEnable = true;
 
     state = "play";
     player = new Player(18);

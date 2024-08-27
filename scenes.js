@@ -5,8 +5,17 @@ function splashScene() {
 }
 
 function playScene() {
-    if (mouseWasPressed(0) || keyWasPressed(32)) {
+    //if (mouseWasPressed(0) || keyWasPressed(32)) {
+    //    fire();
+    //}
+
+    if (!fireTimer.isSet()) {
+        fireTimer.set(.3);
+    }
+
+    if (fireTimer.elapsed() && mouseIsDown(0)) {
         fire();
+        fireTimer.set(.2);
     }
 
     if (!spawnBlockTimer.isSet()){
