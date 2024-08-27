@@ -3,10 +3,10 @@
 class Player extends EngineObject
 {
     /** Player object
-     *  @param {Number} x - World space x position of the player */
-    constructor(x)
+     *  @param {Vector2} pos - World space position of the player */
+    constructor(pos)
     {
-        super(vec2(x, 1.5), playerSize, tile(0)); // set object position and size
+        super(pos, playerSize, tile(0)); // set object position and size
         this.setCollision();
         this.color = playerColor;
     }

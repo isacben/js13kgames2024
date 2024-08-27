@@ -26,7 +26,7 @@ class Diamond extends EngineObject
         }
         this.color.a += this.alphaChange;
 
-        if (this.pos.y < 2.5)
+        if (this.pos.y < playerInit.y + 1)
             this.setCollision();
 
         if (this.pos.y < -1)

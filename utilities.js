@@ -3,12 +3,12 @@
 function resetGame() {
     score = 0;
     powerUp = 0;
-    level = Array.from(Array(8), () => []);
+    level = Array.from(Array(columns), () => []);
 }
 
 function spawnBlock() {
     if (spawnBlockTimer.elapsed()) {
-        const col = randInt(0, 8);
+        const col = randInt(0, columns);
         const pos = level[col].length + 1;
         const x = col * blockSize + blockSize / 2;
         const y = firstRow - pos * blockSize;
@@ -20,7 +20,7 @@ function spawnBlock() {
 }
 
 function moveBlocks() {
-    for (let col=0; col<8; col++)
+    for (let col=0; col<columns; col++)
     for (let row=0; row<level[col].length; row++) {
         level[col][row].pos.y = firstRow-(row)*blockSize; 
     }

@@ -1,9 +1,11 @@
 'use strict';
 
 const levelSize = vec2(20, 40); // size of play area
-const firstRow = 35;
-const blockSize = 2.5;
+const firstRow = 36;
+const blockSize = 2.0; // ori: 2.5
+const columns = 10; // ori: 8
 const playerSize = vec2(1.4,2);
+const playerInit = vec2(18, 8); // ori: 1.5
 
 const bgColor = new Color(0.047, 0.058, 0.039);
 const playerColor = new Color(0.254, 0.917, 0.831);
@@ -19,7 +21,7 @@ function gameInit() {
     canvasFixedSize = vec2(720, 1280); // use a 720p fixed size canvas
 
     // same as: level = [[], [], [], [], [], [], [], []];
-    level = Array.from(Array(8), () => []);
+    level = Array.from(Array(columns), () => []);
 
     score = 0;
     lostTimer = new Timer;
@@ -27,10 +29,8 @@ function gameInit() {
     diamondTimer = new Timer;
     fireTimer = new Timer;
 
-    touchGamepadEnable = true;
-
     state = "play";
-    player = new Player(18);
+    player = new Player(playerInit);
     powerUp = 0;
 
     new Wall(vec2(-.5,0), vec2(1,80)) // left
@@ -79,7 +79,7 @@ function gameRenderPost() {
         case "play":
             drawTextScreen(
                 score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
-                vec2(mainCanvasSize.x - 55, 65),
+                vec2(mainCanvasSize.x - 55, 48),
                 50, playerColor,
                 undefined, undefined,
                 "right"

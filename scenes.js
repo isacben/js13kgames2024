@@ -5,9 +5,9 @@ function splashScene() {
 }
 
 function playScene() {
-    //if (mouseWasPressed(0) || keyWasPressed(32)) {
-    //    fire();
-    //}
+    if (/*mouseWasPressed(0) || */keyWasPressed(32)) {
+        fire();
+    }
 
     if (!fireTimer.isSet()) {
         fireTimer.set(.3);
@@ -30,7 +30,7 @@ function playScene() {
     spawnDiamond();
 
     // game over condition
-    for (let i=0; i<8; i++) {
+    for (let i=0; i<columns; i++) {
         if (level[i].length > 12) {
             lostTimer.set(0.1);
             state = "lost";
