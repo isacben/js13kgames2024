@@ -26,15 +26,17 @@ function moveBlocks() {
     }
 }
 
-function fire() {
-    if (powerUp === 0) { // normal bullet
-        new Bullet(player.pos);
+function fire(swiped=false) {
+    if (swiped) { // hard bullet
+        if (hardBullets > 0) {
+            new Bullet(player.pos, vec2(0, 0.8), "hard");
+            hardBullets -= 1;
+        }
         return 0;
     }
-
-    if (powerUp >= 10) { // hard bullet
-        new Bullet(player.pos, vec2(0, 0.8), "hard");
-        powerUp -= 10;
+    
+    if (powerUp === 0) { // normal bullet
+        new Bullet(player.pos);
         return 0;
     }
 
@@ -49,6 +51,13 @@ function spawnDiamond() {
         const x = randInt(1, 15);
         new Diamond(vec2(x, 41));
         diamondTimer.set(2);
+    }
+
+    // diamond that gives you a strong bullet
+    if (hardBulletTimer.elapsed()) {
+        const x = randInt(1,15);
+        new Diamond(vec2(2, 41), 1, "hard");
+        hardBulletTimer.set(10,20);
     }
 }
 

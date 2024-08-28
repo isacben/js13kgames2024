@@ -15,7 +15,7 @@ const extraColor = new Color(0.568, 0.003, 0.968);
 const textColor = playerColor;
 
 let touchStart, touchEnd;
-let level, score, state, lostTimer, spawnBlockTimer, diamondTimer, swipeTimer, fireTimer, powerUp, player;
+let level, score, state, lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, powerUp, hardBullets, player;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -29,11 +29,13 @@ function gameInit() {
     spawnBlockTimer = new Timer;
     swipeTimer = new Timer;
     diamondTimer = new Timer;
+    hardBulletTimer = new Timer;
     fireTimer = new Timer;
 
     state = "play";
     player = new Player(playerInit);
     powerUp = 0;
+    hardBullets = 0;
 
     new Wall(vec2(-.5,0), vec2(1,80)) // left
     new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
@@ -83,7 +85,7 @@ function gameRenderPost() {
             break;
         case "play":
             drawTile(vec2(1,38.5),vec2(1.2),tile(2), extraColor);
-            drawTextScreen("x " + powerUp, vec2(130, 45), 40, playerColor);
+            drawTextScreen("x " + hardBullets, vec2(130, 45), 40, playerColor);
             drawTextScreen(
                 score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
                 vec2(mainCanvasSize.x - 55, 48),

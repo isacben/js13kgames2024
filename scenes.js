@@ -26,7 +26,8 @@ function playScene() {
     }
 
     if (swiped() || (!isTouchDevice && mouseWasPressed(0))) { // first condition, mobile; second condition, computer
-            new Bullet(player.pos, vec2(0, 0.8), "hard");
+            //new Bullet(player.pos, vec2(0, 0.8), "hard");
+            fire(true);
             touchEnd = 0;
             touchStart = 0;
     }
@@ -46,6 +47,9 @@ function playScene() {
         diamondTimer.set(2);
     }
     spawnDiamond();
+
+    if (!hardBulletTimer.isSet())
+        hardBulletTimer.set(randInt(10,20));
 
     // game over condition
     for (let i=0; i<columns; i++) {
