@@ -54,7 +54,7 @@ function spawnDiamond() {
 
 function swiped() {
     console.log(touchEnd, touchStart);
-    if (touchEnd.y > touchStart.y && touchEnd.y - touchStart.y > 6 && !swipeTimer.elapsed())
+    if (touchEnd.y > touchStart.y && touchEnd.y - touchStart.y > 3 && !swipeTimer.elapsed())
         return true;
 
     return false;

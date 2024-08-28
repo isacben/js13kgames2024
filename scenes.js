@@ -16,8 +16,9 @@ function playScene() {
 
     if (mouseWasPressed(0)) {
         touchStart = mousePos;
+        touchEnd = touchStart;
         fireTimer.set(.1); // prevent double shoot when swipping
-        swipeTimer.set(.3);
+        swipeTimer.set(.2);
     }
 
     if (mouseWasReleased(0)) {
@@ -26,12 +27,13 @@ function playScene() {
 
     if (swiped()) {
             new Bullet(player.pos, vec2(0, 0.8), "hard");
-            touchEnd = touchStart;
+            touchEnd = 0;
+            touchStart = 0;
     }
 
     if (fireTimer.elapsed() && mouseIsDown(0) && isTouchDevice) {
-            fire();
-            fireTimer.set(.2);
+        fire();
+        fireTimer.set(.2);
     }
 
     if (!spawnBlockTimer.isSet()){
