@@ -16,17 +16,20 @@ function playScene() {
 
     if (mouseWasPressed(0)) {
         touchStart = mousePos;
-        swipeTimer.set(.2);
+        fireTimer.set(.1); // prevent double shoot when swipping
+        swipeTimer.set(.3);
     }
 
     if (mouseWasReleased(0)) {
         touchEnd = mousePos;
-        if (swiped() && !swipeTimer.elapsed()) {
-            new Bullet(player.pos, vec2(0, 0.8), "hard");
-        }
     }
 
-    if (fireTimer.elapsed() && mouseIsDown(0)) {
+    if (swiped()) {
+            new Bullet(player.pos, vec2(0, 0.8), "hard");
+            touchEnd = touchStart;
+    }
+
+    if (fireTimer.elapsed() && mouseIsDown(0) && isTouchDevice) {
             fire();
             fireTimer.set(.2);
     }
