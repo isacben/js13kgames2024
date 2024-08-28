@@ -25,7 +25,7 @@ function playScene() {
         touchEnd = mousePos;
     }
 
-    if (swiped()) {
+    if (swiped() || (!isTouchDevice && mouseWasPressed(0))) { // first condition, mobile; second condition, computer
             new Bullet(player.pos, vec2(0, 0.8), "hard");
             touchEnd = 0;
             touchStart = 0;
