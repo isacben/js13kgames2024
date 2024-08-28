@@ -51,3 +51,11 @@ function spawnDiamond() {
         diamondTimer.set(2);
     }
 }
+
+function swiped() {
+    console.log(touchEnd, touchStart);
+    if (touchEnd.y > touchStart.y && touchEnd.y - touchStart.y > 6)
+        return true;
+
+    return false;
+}

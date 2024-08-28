@@ -13,9 +13,22 @@ function playScene() {
         fireTimer.set(.3);
     }
 
+
+    if (mouseWasPressed(0)) {
+        touchStart = mousePos;
+        swipeTimer.set(.2);
+    }
+
+    if (mouseWasReleased(0)) {
+        touchEnd = mousePos;
+        if (swiped() && !swipeTimer.elapsed()) {
+            new Bullet(player.pos, vec2(0, 0.8), "hard");
+        }
+    }
+
     if (fireTimer.elapsed() && mouseIsDown(0)) {
-        fire();
-        fireTimer.set(.2);
+            fire();
+            fireTimer.set(.2);
     }
 
     if (!spawnBlockTimer.isSet()){
