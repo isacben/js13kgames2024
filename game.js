@@ -14,8 +14,8 @@ const bulletColor = new Color(0.984, 1, 0.07);
 const extraColor = new Color(0.568, 0.003, 0.968);
 const textColor = playerColor;
 
-let touchStart, touchEnd;
-let level, score, state, lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, powerUp, hardBullets, player;
+let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer;
+let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -24,7 +24,6 @@ function gameInit() {
     // same as: level = [[], [], [], [], [], [], [], []];
     level = Array.from(Array(columns), () => []);
 
-    score = 0;
     lostTimer = new Timer;
     spawnBlockTimer = new Timer;
     swipeTimer = new Timer;
@@ -32,22 +31,23 @@ function gameInit() {
     hardBulletTimer = new Timer;
     fireTimer = new Timer;
 
-    state = "play";
-    player = new Player(playerInit);
+    score = 0;
+    state = "title";
     powerUp = 0;
     hardBullets = 0;
-
-    new Wall(vec2(-.5,0), vec2(1,80)) // left
-    new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
-
     touchStart = vec2(0,0);
     touchEnd = vec2(0,0);
+
+    player = new Player(playerInit);
+    new Wall(vec2(-.5,0), vec2(1,80)) // left
+    new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
+    playBtn = new Button(vec2(8, 15), vec2(5,2), "PLAY");
 }
 
 function gameUpdate() {
     switch (state) {
-        case "splash":
-            splashScene();
+        case "title":
+            titleScene();
             if (keyWasPressed(13)) {
                 state = "play";
             }
@@ -80,8 +80,8 @@ function gameRenderPost() {
     // called after objects are rendered
     // draw effects or hud that appear above all objects
     switch (state) {
-        case "splash":
-            splashScene();
+        case "title":
+            titleScene();
             break;
         case "play":
             drawTile(vec2(1,38.5),vec2(1.2),tile(2), extraColor);

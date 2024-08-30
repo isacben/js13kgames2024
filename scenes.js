@@ -1,7 +1,11 @@
 'use strict';
 
-function splashScene() {
-    drawTextScreen("Welcome", vec2(mainCanvasSize.x/2, mainCanvasSize.y/2), 50);
+function titleScene() {
+    drawTextScreen("13lock", vec2(mainCanvasSize.x/2, mainCanvasSize.y/2), 50);
+    
+    if (mouseWasPressed(0)) {
+        new Click(mousePos);
+    }
 }
 
 function playScene() {

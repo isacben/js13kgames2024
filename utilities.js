@@ -56,13 +56,12 @@ function spawnDiamond() {
     // diamond that gives you a strong bullet
     if (hardBulletTimer.elapsed()) {
         const x = randInt(1,15);
-        new Diamond(vec2(2, 41), 1, "hard");
+        new Diamond(vec2(x, 41), 1, "hard");
         hardBulletTimer.set(10,20);
     }
 }
 
 function swiped() {
-    console.log(touchEnd, touchStart);
     if (touchEnd.y > touchStart.y && touchEnd.y - touchStart.y > 3 && !swipeTimer.elapsed())
         return true;
 
