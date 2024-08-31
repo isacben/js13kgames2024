@@ -1,7 +1,9 @@
 'use strict';
 
 function titleScene() {
-    drawTextScreen("13lock", vec2(mainCanvasSize.x/2, mainCanvasSize.y/2), 50);
+    //drawTextScreen("UNBLOCK", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
+
+    printTitle();
     
     if (mouseWasPressed(0)) {
         new Click(mousePos);
@@ -57,7 +59,7 @@ function playScene() {
 
     // game over condition
     for (let i=0; i<columns; i++) {
-        if (level[i].length > 12) {
+        if (level[i].length > 2) {
             lostTimer.set(0.1);
             state = "lost";
         }
@@ -76,8 +78,8 @@ function lostScene() {
         }
     }
 
-    if (engineObjects.length < 4) {
+    if (engineObjects.length < 5) {
         resetGame();
-        state = "splash";
+        state = "title";
     }
 }

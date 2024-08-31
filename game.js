@@ -14,6 +14,58 @@ const bulletColor = new Color(0.984, 1, 0.07);
 const extraColor = new Color(0.568, 0.003, 0.968);
 const textColor = playerColor;
 
+const gameTitle = {
+    'U': [
+        [1,,1],
+        [1,,1],
+        [1,,1],
+        [1,,1],
+        [,1,1]
+    ],
+    'N': [
+        [1,1],
+        [1,,1],
+        [1,,1],
+        [1,,1],
+        [1,,1]
+    ],
+    'B': [
+        [1,1,1],
+        [1, ,1],
+        [1,1],
+        [1,,1],
+        [1,1,1]
+    ],
+    'L': [
+        [1],
+        [1],
+        [1],
+        [1],
+        [1,1,1]
+    ],
+    'O': [
+        [,1,1],
+        [1,,1],
+        [1,,1],
+        [1,,1],
+        [1,1]
+    ],
+    'C': [
+        [,1,1],
+        [1],
+        [1],
+        [1],
+        [,1,1]
+    ],
+    'K': [
+        [1,,1],
+        [1,,1],
+        [1,1],
+        [1,,1],
+        [1,,1]
+    ]
+}
+
 let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer;
 let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn;
 
@@ -41,7 +93,7 @@ function gameInit() {
     player = new Player(playerInit);
     new Wall(vec2(-.5,0), vec2(1,80)) // left
     new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
-    playBtn = new Button(vec2(8, 15), vec2(5,2), "PLAY");
+    playBtn = new Button(cameraPos, vec2(6,2), "PLAY");
 }
 
 function gameUpdate() {
@@ -49,6 +101,7 @@ function gameUpdate() {
         case "title":
             titleScene();
             if (keyWasPressed(13)) {
+                hideButtons(true);
                 state = "play";
             }
             break;

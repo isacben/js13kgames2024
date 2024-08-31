@@ -17,7 +17,7 @@ class Button extends EngineObject
     render() {
         drawRect(this.pos, this.size, blockColor);
         drawRect(this.pos, this.size.multiply(vec2(.97,.9)), bgColor); // block color
-        drawText(this.label, vec2(this.pos.x, this.pos.y - 0.1), this.size.y * 0.6, textColor);
+        drawText(this.label, vec2(this.pos.x, this.pos.y - 0.1), this.size.y * 0.5, textColor);
     }
 
 }
@@ -41,8 +41,10 @@ class Click extends EngineObject
     }
     
     collideWithObject(o) {
-        if (o === playBtn)
+        if (o === playBtn) {
+            hideButtons(true);
             state = "play";
+        }
 
         this.destroy();
         return 1; 

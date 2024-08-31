@@ -3,8 +3,9 @@
 ### Todo
 
 - [ ] cover screen
+- [ ] title screen design
 - [ ] menu
-    - [ ] button class
+    - [x] button class
     - [ ] start
     - [ ] pause
     - [ ] difficulty 

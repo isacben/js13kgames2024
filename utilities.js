@@ -4,6 +4,7 @@ function resetGame() {
     score = 0;
     powerUp = 0;
     level = Array.from(Array(columns), () => []);
+    hideButtons(false)
 }
 
 function spawnBlock() {
@@ -66,4 +67,38 @@ function swiped() {
         return true;
 
     return false;
+}
+
+function hideButtons(hidden) {
+    if (hidden) {
+        playBtn.pos = vec2(-5, -5);
+    } else {
+        playBtn.pos = cameraPos;
+    }
+}
+
+function printTitle() {
+    const title = "UNBLOCK";
+    const posX = .9;
+    const posY = 30;
+    const size = vec2(.7)
+    let currX = 0;
+    for (let i=0; i < title.length; i++) {
+        let letter = gameTitle[title.charAt(i)];
+
+        let currY = 0;
+        let addX = 0;
+
+        for (let y = letter.length-1; y >= 0; y--) {
+            let row = letter[y];
+            for (let x = 0; x < row.length; x++) {
+                if (row[x]) {
+                    drawRect(vec2(posX + currX + x*size.x, posY + currY), size, blockColor);
+                }
+            }
+            addX = Math.max(addX, row.length * size.x);
+            currY += size.x;
+        }
+        currX += size.x + addX;
+    }
 }
