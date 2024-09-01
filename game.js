@@ -66,8 +66,8 @@ const gameTitle = {
     ]
 }
 
-let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer;
-let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn;
+let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer;
+let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, titleLetter;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -82,6 +82,7 @@ function gameInit() {
     diamondTimer = new Timer;
     hardBulletTimer = new Timer;
     fireTimer = new Timer;
+    titleTimer = new Timer;
 
     score = 0;
     state = "title";
@@ -89,6 +90,7 @@ function gameInit() {
     hardBullets = 0;
     touchStart = vec2(0,0);
     touchEnd = vec2(0,0);
+    titleLetter = "B";
 
     player = new Player(playerInit);
     new Wall(vec2(-.5,0), vec2(1,80)) // left

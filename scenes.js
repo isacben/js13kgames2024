@@ -3,6 +3,14 @@
 function titleScene() {
     //drawTextScreen("UNBLOCK", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
 
+    if (!titleTimer.isSet()) {
+            titleTimer.set(.5);
+    }
+
+    if (titleTimer.elapsed()) {
+        titleLetter = "UNBLOCK".charAt(randInt(0,7));
+        titleTimer.set(rand(.7, 2));
+    }
     printTitle();
     
     if (mouseWasPressed(0)) {

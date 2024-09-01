@@ -79,12 +79,22 @@ function hideButtons(hidden) {
 
 function printTitle() {
     const title = "UNBLOCK";
-    const posX = .9;
+    const posX = 1.5;
     const posY = 30;
-    const size = vec2(.7)
+    const size = vec2(.65, .6)
+
+
+    let color = blockColor;
+
     let currX = 0;
     for (let i=0; i < title.length; i++) {
         let letter = gameTitle[title.charAt(i)];
+
+        if (title.charAt(i) === titleLetter) {
+            color = bgColor.lerp(playerColor, titleTimer.getPercent()-.01);
+        } else {
+            color = playerColor;//.lerp(blockColor, titleTimer.getPercent());
+        }
 
         let currY = 0;
         let addX = 0;
@@ -93,7 +103,7 @@ function printTitle() {
             let row = letter[y];
             for (let x = 0; x < row.length; x++) {
                 if (row[x]) {
-                    drawRect(vec2(posX + currX + x*size.x, posY + currY), size, blockColor);
+                    drawRect(vec2(posX + currX + x*size.x, posY + currY), size, color);
                 }
             }
             addX = Math.max(addX, row.length * size.x);
