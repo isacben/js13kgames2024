@@ -16,6 +16,8 @@ function titleScene() {
     if (mouseWasPressed(0)) {
         new Click(mousePos);
     }
+    
+    soundIconBtn.pos = vec2(-5,1);
 }
 
 function playScene() {
@@ -67,11 +69,16 @@ function playScene() {
 
     // game over condition
     for (let i=0; i<columns; i++) {
-        if (level[i].length > 12) {
+        if (level[i].length > 2) {
             lostTimer.set(0.1);
             state = "lost";
         }
     }
+
+    if (mouseWasPressed(0))
+        new Click(mousePos);
+
+    soundIconBtn.pos = vec2(1,1);
 }
 
 function lostScene() {
@@ -86,7 +93,7 @@ function lostScene() {
         }
     }
 
-    if (engineObjects.length < 6) {
+    if (engineObjects.length < 7) {
         resetGame();
         state = "title";
     }

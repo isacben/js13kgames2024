@@ -47,9 +47,10 @@ class Click extends EngineObject
             state = "play";
         }
 
-        if (o === soundBtn) {
+        if (o === soundBtn || o === soundIconBtn) {
             isMuted = !isMuted;
             soundBtn.label = isMuted ? "UNMUTE" : "MUTE";
+            soundIconBtn.label = isMuted ? " ̶♫̶" : "♫";
 
             if (!isMuted) sound_button.play();
         }

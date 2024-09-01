@@ -17,8 +17,8 @@ const textColor = playerColor;
 // Sound effects
 const sound_shot = new Sound([.5,,432,.02,.01,.07,1,.3,-4,-2,,,,,,.2,.01,.93,.17,,-1390]);
 const sound_button = new Sound([2.5,,113,.03,.02,.008,1,2.1,,7,141,.13,,,,.4,,.67,.02,.05,-1492]);
-const sound_hit = new Sound([,,74,.01,.05,.04,3,1.2,,,,,,,87,,,.79,.02,,-1344]);
-const sound_destroy = new Sound([.6,,73,.03,.1,.55,2,,-2,,,,.12,1,,.3,,.44,.11,.1,-3214]);
+const sound_hit = new Sound([2.1,,79,.01,.03,.06,1,3.7,,,,,,.4,,,.15,.6,.04,,-2355]);
+const sound_destroy = new Sound([1.8,,66,.09,.05,.36,1,2.7,,,,,,2,,.2,.09,.43,.21]);
 
 const gameTitle = {
     'U': [
@@ -73,7 +73,7 @@ const gameTitle = {
 }
 
 let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer;
-let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, titleLetter, isMuted;
+let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, soundIconBtn, titleLetter, isMuted;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -104,6 +104,9 @@ function gameInit() {
     new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
     playBtn = new Button(cameraPos, vec2(6,2), "PLAY");
     soundBtn = new Button(vec2(cameraPos.x, cameraPos.y - 2.5), vec2(6,2), "MUTE");
+    soundIconBtn = new Button(vec2(-5, 1), vec2(2,2), "♫");
+
+    // pause: ⏸ 
 }
 
 function gameUpdate() {
