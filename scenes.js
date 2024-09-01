@@ -67,7 +67,7 @@ function playScene() {
 
     // game over condition
     for (let i=0; i<columns; i++) {
-        if (level[i].length > 2) {
+        if (level[i].length > 12) {
             lostTimer.set(0.1);
             state = "lost";
         }
@@ -86,7 +86,7 @@ function lostScene() {
         }
     }
 
-    if (engineObjects.length < 5) {
+    if (engineObjects.length < 6) {
         resetGame();
         state = "title";
     }

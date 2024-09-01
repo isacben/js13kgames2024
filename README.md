@@ -3,7 +3,7 @@
 ### Todo
 
 - [ ] cover screen
-- [ ] title screen design
+- [x] title screen design
 - [ ] menu
     - [x] button class
     - [ ] start

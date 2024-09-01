@@ -42,6 +42,8 @@ class Block extends EngineObject
                 1, 0, 1.8, PI,   // damp, angleDamp, gravity, cone
                 .1, .4, 0, 0        // fade, randomness, collide, additive
             );
+
+            if (!isMuted) sound_hit.play(this.pos);
         }
 
         if ((this.num < 1 || o.type === "hard")) {
@@ -67,6 +69,8 @@ class Block extends EngineObject
                 .99, .95, .4, PI,   // damp, angleDamp, gravity, cone
                 .1, .8, 0, 1        // fade, randomness, collide, additive
             );
+            
+            if (!isMuted) sound_destroy.play(this.pos);
         }
         return 1;
     }

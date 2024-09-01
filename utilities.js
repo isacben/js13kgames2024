@@ -38,6 +38,8 @@ function fire(swiped=false) {
     
     if (powerUp === 0) { // normal bullet
         new Bullet(player.pos);
+
+        //if (!isMuted) sound_shot.play(player.pos);
         return 0;
     }
 
@@ -72,8 +74,11 @@ function swiped() {
 function hideButtons(hidden) {
     if (hidden) {
         playBtn.pos = vec2(-5, -5);
+        soundBtn.pos = vec2(-5, -5);
     } else {
         playBtn.pos = cameraPos;
+        soundBtn.pos.x = cameraPos.x;
+        soundBtn.pos.y = cameraPos.y - 2.5;
     }
 }
 
