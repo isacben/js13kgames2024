@@ -3,413 +3,36 @@
 'use strict';
 
 /** 
- * LittleJS Debug System
- * - Press Esc to show debug overlay with mouse pick
- * - Number keys toggle debug functions
- * - +/- apply time scale
- * - Debug primitive rendering
- * - Save a 2d canvas as a png image
- * @namespace Debug
+ * LittleJS - Release Mode
+ * - This file is used for release builds in place of engineDebug.js
+ * - Debug functionality is disabled to reduce size and increase performance
  */
 
 
 
-/** True if debug is enabled
- *  @type {Boolean}
- *  @default
- *  @memberof Debug */
-const debug = 1;
+let showWatermark = 0;
+let debugKey = '';
+const debug = 0;
+const debugOverlay = 0;
+const debugPhysics = 0;
+const debugParticles = 0;
+const debugRaycast = 0;
+const debugGamepads = 0;
+const debugMedals = 0;
 
-/** True if asserts are enaled
- *  @type {Boolean}
- *  @default
- *  @memberof Debug */
-const enableAsserts = 1;
-
-/** Size to render debug points by default
- *  @type {Number}
- *  @default
- *  @memberof Debug */
-const debugPointSize = .5;
-
-/** True if watermark with FPS should be shown, false in release builds
- *  @type {Boolean}
- *  @default
- *  @memberof Debug */
-let showWatermark = 1;
-
-/** Key code used to toggle debug mode, Esc by default
- *  @type {Boolean}
- *  @default
- *  @memberof Debug */
-let debugKey = 27;
-
-// Engine internal variables not exposed to documentation
-let debugPrimitives = [], debugOverlay = 0, debugPhysics = 0, debugRaycast = 0,
-debugParticles = 0, debugGamepads = 0, debugMedals = 0, debugTakeScreenshot, downloadLink;
-
-///////////////////////////////////////////////////////////////////////////////
-// Debug helper functions
-
-/** Asserts if the experssion is false, does not do anything in release builds
- *  @param {Boolean} assertion
- *  @param {Object}  output
- *  @memberof Debug */
-function ASSERT(...assert) { enableAsserts && console.assert(...assert); }
-
-/** Draw a debug rectangle in world space
- *  @param {Vector2} pos
- *  @param {Vector2} [size=Vector2()]
- *  @param {String}  [color='#fff']
- *  @param {Number}  [time=0]
- *  @param {Number}  [angle=0]
- *  @param {Boolean} [fill=false]
- *  @memberof Debug */
-function debugRect(pos, size=vec2(), color='#fff', time=0, angle=0, fill=false)
-{
-    ASSERT(typeof color == 'string'); // pass in regular html strings as colors
-    debugPrimitives.push({pos, size:vec2(size), color, time:new Timer(time), angle, fill});
-}
-
-/** Draw a debug circle in world space
- *  @param {Vector2} pos
- *  @param {Number}  [radius=0]
- *  @param {String}  [color='#fff']
- *  @param {Number}  [time=0]
- *  @param {Boolean} [fill=false]
- *  @memberof Debug */
-function debugCircle(pos, radius=0, color='#fff', time=0, fill=false)
-{
-    ASSERT(typeof color == 'string'); // pass in regular html strings as colors
-    debugPrimitives.push({pos, size:radius, color, time:new Timer(time), angle:0, fill});
-}
-
-/** Draw a debug point in world space
- *  @param {Vector2} pos
- *  @param {String}  [color='#fff']
- *  @param {Number}  [time=0]
- *  @param {Number}  [angle=0]
- *  @memberof Debug */
-function debugPoint(pos, color, time, angle) {debugRect(pos, 0, color, time, angle);}
-
-/** Draw a debug line in world space
- *  @param {Vector2} posA
- *  @param {Vector2} posB
- *  @param {String}  [color='#fff']
- *  @param {Number}  [thickness=.1]
- *  @param {Number}  [time=0]
- *  @memberof Debug */
-function debugLine(posA, posB, color, thickness=.1, time)
-{
-    const halfDelta = vec2((posB.x - posA.x)/2, (posB.y - posA.y)/2);
-    const size = vec2(thickness, halfDelta.length()*2);
-    debugRect(posA.add(halfDelta), size, color, time, halfDelta.angle(), 1);
-}
-
-/** Draw a debug axis aligned bounding box in world space
- *  @param {Vector2} posA
- *  @param {Vector2} sizeA
- *  @param {Vector2} posB
- *  @param {Vector2} sizeB
- *  @param {String}  [color='#fff']
- *  @memberof Debug */
-function debugAABB(pA, sA, pB, sB, color)
-{
-    const minPos = vec2(min(pA.x - sA.x/2, pB.x - sB.x/2), min(pA.y - sA.y/2, pB.y - sB.y/2));
-    const maxPos = vec2(max(pA.x + sA.x/2, pB.x + sB.x/2), max(pA.y + sA.y/2, pB.y + sB.y/2));
-    debugRect(minPos.lerp(maxPos,.5), maxPos.subtract(minPos), color);
-}
-
-/** Draw a debug axis aligned bounding box in world space
- *  @param {String}  text
- *  @param {Vector2} pos
- *  @param {Number}  [size=1]
- *  @param {String}  [color='#fff']
- *  @param {Number}  [time=0]
- *  @param {Number}  [angle=0]
- *  @param {String}  [font='monospace']
- *  @memberof Debug */
-function debugText(text, pos, size=1, color='#fff', time=0, angle=0, font='monospace')
-{
-    ASSERT(typeof color == 'string'); // pass in regular html strings as colors
-    debugPrimitives.push({text, pos, size, color, time:new Timer(time), angle, font});
-}
-
-/** Clear all debug primitives in the list
- *  @memberof Debug */
-function debugClear() { debugPrimitives = []; }
-
-/** Save a canvas to disk 
- *  @param {HTMLCanvasElement} canvas
- *  @param {String}            [filename]
- *  @param {String}            [type='image/png']
- *  @memberof Debug */
-function debugSaveCanvas(canvas, filename=engineName, type='image/png')
-{ debugSaveDataURL(canvas.toDataURL(type), filename); }
-
-/** Save a text file to disk 
- *  @param {String}     text
- *  @param {String}     [filename]
- *  @param {String}     [type='text/plain']
- *  @memberof Debug */
-function debugSaveText(text, filename=engineName, type='text/plain')
-{ debugSaveDataURL(URL.createObjectURL(new Blob([text], {'type':type})), filename); }
-
-/** Save a data url to disk 
- *  @param {String}     dataURL
- *  @param {String}     filename
- *  @memberof Debug */
-function debugSaveDataURL(dataURL, filename)
-{
-    downloadLink.download = filename;
-    downloadLink.href = dataURL;
-    downloadLink.click();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Engine debug function (called automatically)
-
-function debugInit()
-{
-    // create link for saving screenshots
-    document.body.appendChild(downloadLink = document.createElement('a'));
-    downloadLink.style.display = 'none';
-}
-
-function debugUpdate()
-{
-    if (!debug)
-        return;
-
-    if (keyWasPressed(debugKey)) // Esc
-        debugOverlay = !debugOverlay;
-    if (debugOverlay)
-    {
-        if (keyWasPressed(48)) // 0
-            showWatermark = !showWatermark;
-        if (keyWasPressed(49)) // 1
-            debugPhysics = !debugPhysics, debugParticles = 0;
-        if (keyWasPressed(50)) // 2
-            debugParticles = !debugParticles, debugPhysics = 0;
-        if (keyWasPressed(51)) // 3
-            debugGamepads = !debugGamepads;
-        if (keyWasPressed(52)) // 4
-            debugRaycast = !debugRaycast;
-        if (keyWasPressed(53)) // 5
-            debugTakeScreenshot = 1;
-        //if (keyWasPressed(54)) // 6
-        //if (keyWasPressed(55)) // 7
-        //if (keyWasPressed(56)) // 8
-        //if (keyWasPressed(57)) // 9
-    }
-}
-
-function debugRender()
-{
-    glCopyToContext(mainContext);
-
-    if (debugTakeScreenshot)
-    {
-        // composite canvas
-        glCopyToContext(mainContext, 1);
-        mainContext.drawImage(overlayCanvas, 0, 0);
-        overlayCanvas.width |= 0;
-
-        // remove alpha and save
-        const w = mainCanvas.width, h = mainCanvas.height;
-        overlayContext.fillRect(0,0,w,h);
-        overlayContext.drawImage(mainCanvas, 0, 0);
-        debugSaveCanvas(overlayCanvas);
-        debugTakeScreenshot = 0;
-    }
-
-    if (debugGamepads && gamepadsEnable && navigator.getGamepads)
-    {
-        // gamepad debug display
-        const gamepads = navigator.getGamepads();
-        for (let i = gamepads.length; i--;)
-        {
-            const gamepad = gamepads[i];
-            if (gamepad)
-            {
-                const stickScale = 1;
-                const buttonScale = .2;
-                const centerPos = cameraPos;
-                const sticks = stickData[i];
-                for (let j = sticks.length; j--;)
-                {
-                    const drawPos = centerPos.add(vec2(j*stickScale*2, i*stickScale*3));
-                    const stickPos = drawPos.add(sticks[j].scale(stickScale));
-                    debugCircle(drawPos, stickScale, '#fff7',0,1);
-                    debugLine(drawPos, stickPos, '#f00');
-                    debugPoint(stickPos, '#f00');
-                }
-                for (let j = gamepad.buttons.length; j--;)
-                {
-                    const drawPos = centerPos.add(vec2(j*buttonScale*2, i*stickScale*3-stickScale-buttonScale));
-                    const pressed = gamepad.buttons[j].pressed;
-                    debugCircle(drawPos, buttonScale, pressed ? '#f00' : '#fff7', 0, 1);
-                    debugText(j, drawPos, .2);
-                }
-            }
-        }
-    }
-
-    if (debugOverlay)
-    {
-        const saveContext = mainContext;
-        mainContext = overlayContext;
-
-        // mouse pick
-        let bestDistance = Infinity, bestObject;
-        for (const o of engineObjects)
-        {
-            if (o.canvas || o.destroyed)
-                continue;
-            if (!o.size.x || !o.size.y)
-                continue;
-
-            const distance = mousePos.distanceSquared(o.pos);
-            if (distance < bestDistance)
-            {
-                bestDistance = distance;
-                bestObject = o;
-            }
-
-            // show object info
-            const size = vec2(max(o.size.x, .2), max(o.size.y, .2));
-            const color1 = new Color(!!o.collideTiles, !!o.collideSolidObjects, !!o.isSolid, o.parent?.2:.5);
-            const color2 = o.parent ? new Color(1,1,1,.5) : new Color(0,0,0,.8);
-            drawRect(o.pos, size, color1, o.angle, 0);
-            drawRect(o.pos, size.scale(.8), color2, o.angle, 0);
-            o.parent && drawLine(o.pos, o.parent.pos, .1, new Color(0,0,1,.5), 0);
-        }
-        
-        if (bestObject)
-        {
-            const raycastHitPos = tileCollisionRaycast(bestObject.pos, mousePos);
-            raycastHitPos && drawRect(raycastHitPos.floor().add(vec2(.5)), vec2(1), new Color(0,1,1,.3));
-            drawRect(mousePos.floor().add(vec2(.5)), vec2(1), new Color(0,0,1,.5), 0, 0);
-            drawLine(mousePos, bestObject.pos, .1, raycastHitPos ? new Color(1,0,0,.5) : new Color(0,1,0,.5), 0);
-
-            const debugText = 'mouse pos = ' + mousePos + 
-                '\nmouse collision = ' + getTileCollisionData(mousePos) + 
-                '\n\n--- object info ---\n' +
-                bestObject.toString();
-            drawTextScreen(debugText, mousePosScreen, 24, new Color, .05, 0, 0, 'monospace');
-        }
-
-        glCopyToContext(mainContext = saveContext);
-    }
-
-    {
-        // draw debug primitives
-        overlayContext.lineWidth = 2;
-        const pointSize = debugPointSize * cameraScale;
-        debugPrimitives.forEach(p=>
-        {
-            overlayContext.save();
-
-            // create canvas transform from world space to screen space
-            const pos = worldToScreen(p.pos);
-            overlayContext.translate(pos.x|0, pos.y|0);
-            overlayContext.rotate(p.angle);
-            overlayContext.fillStyle = overlayContext.strokeStyle = p.color;
-
-            if (p.text != undefined)
-            {
-                overlayContext.font = p.size*cameraScale + 'px '+ p.font;
-                overlayContext.textAlign = 'center';
-                overlayContext.textBaseline = 'middle';
-                overlayContext.fillText(p.text, 0, 0);
-            }
-            else if (p.size == 0 || p.size.x === 0 && p.size.y === 0 )
-            {
-                // point
-                overlayContext.fillRect(-pointSize/2, -1, pointSize, 3);
-                overlayContext.fillRect(-1, -pointSize/2, 3, pointSize);
-            }
-            else if (p.size.x != undefined)
-            {
-                // rect
-                const w = p.size.x*cameraScale|0, h = p.size.y*cameraScale|0;
-                p.fill && overlayContext.fillRect(-w/2|0, -h/2|0, w, h);
-                overlayContext.strokeRect(-w/2|0, -h/2|0, w, h);
-            }
-            else
-            {
-                // circle
-                overlayContext.beginPath();
-                overlayContext.arc(0, 0, p.size*cameraScale, 0, 9);
-                p.fill && overlayContext.fill();
-                overlayContext.stroke();
-            }
-            
-            overlayContext.restore();
-        });
-
-        // remove expired pritives
-        debugPrimitives = debugPrimitives.filter(r=>r.time<0);
-    }
-
-    {
-        // draw debug overlay
-        overlayContext.save();
-        overlayContext.fillStyle = '#fff';
-        overlayContext.textAlign = 'left';
-        overlayContext.textBaseline = 'top';
-        overlayContext.font = '28px monospace';
-        overlayContext.shadowColor = '#000';
-        overlayContext.shadowBlur = 9;
-
-        let x = 9, y = -20, h = 30;
-        if (debugOverlay)
-        {
-            overlayContext.fillText(engineName, x, y += h);
-            overlayContext.fillText('Objects: ' + engineObjects.length, x, y += h);
-            overlayContext.fillText('Time: ' + formatTime(time), x, y += h);
-            overlayContext.fillText('---------', x, y += h);
-            overlayContext.fillStyle = '#f00';
-            overlayContext.fillText('ESC: Debug Overlay', x, y += h);
-            overlayContext.fillStyle = debugPhysics ? '#f00' : '#fff';
-            overlayContext.fillText('1: Debug Physics', x, y += h);
-            overlayContext.fillStyle = debugParticles ? '#f00' : '#fff';
-            overlayContext.fillText('2: Debug Particles', x, y += h);
-            overlayContext.fillStyle = debugGamepads ? '#f00' : '#fff';
-            overlayContext.fillText('3: Debug Gamepads', x, y += h);
-            overlayContext.fillStyle = debugRaycast ? '#f00' : '#fff';
-            overlayContext.fillText('4: Debug Raycasts', x, y += h);
-            overlayContext.fillStyle = '#fff';
-            overlayContext.fillText('5: Save Screenshot', x, y += h);
-
-            let keysPressed = '';
-            for(const i in inputData[0])
-            {
-                if (i && keyIsDown(i, 0))
-                    keysPressed += i + ' ' ;
-            }
-            keysPressed && overlayContext.fillText('Keys Down: ' + keysPressed, x, y += h);
-
-            let buttonsPressed = '';
-            if (inputData[1])
-            for(const i in inputData[1])
-            {
-                if (i && keyIsDown(i, 1))
-                    buttonsPressed += i + ' ' ;
-            }
-            buttonsPressed && overlayContext.fillText('Gamepad: ' + buttonsPressed, x, y += h);
-        }
-        else
-        {
-            overlayContext.fillText(debugPhysics ? 'Debug Physics' : '', x, y += h);
-            overlayContext.fillText(debugParticles ? 'Debug Particles' : '', x, y += h);
-            overlayContext.fillText(debugRaycast ? 'Debug Raycasts' : '', x, y += h);
-            overlayContext.fillText(debugGamepads ? 'Debug Gamepads' : '', x, y += h);
-        }
-    
-        overlayContext.restore();
-    }
-}
+// debug commands are automatically removed from the final build
+function ASSERT          (){}
+function debugInit       (){}
+function debugUpdate     (){}
+function debugRender     (){}
+function debugRect       (){}
+function debugCircle     (){}
+function debugPoint      (){}
+function debugLine       (){}
+function debugAABB       (){}
+function debugText       (){}
+function debugClear      (){}
+function debugSaveCanvas (){}
 /**
  * LittleJS Utility Classes and Functions
  * - General purpose math library
@@ -448,7 +71,7 @@ function min(valueA, valueB) { return Math.min(valueA, valueB); }
  *  @memberof Utilities */
 function max(valueA, valueB) { return Math.max(valueA, valueB); }
 
-/** Returns the sign of value passed in (also returns 1 if 0)
+/** Returns the sign of value passed in
  *  @param {Number} value
  *  @return {Number}
  *  @memberof Utilities */
@@ -456,15 +79,15 @@ function sign(value) { return Math.sign(value); }
 
 /** Returns first parm modulo the second param, but adjusted so negative numbers work as expected
  *  @param {Number} dividend
- *  @param {Number} [divisor=1]
+ *  @param {Number} [divisor]
  *  @return {Number}
  *  @memberof Utilities */
 function mod(dividend, divisor=1) { return ((dividend % divisor) + divisor) % divisor; }
 
 /** Clamps the value beween max and min
  *  @param {Number} value
- *  @param {Number} [min=0]
- *  @param {Number} [max=1]
+ *  @param {Number} [min]
+ *  @param {Number} [max]
  *  @return {Number}
  *  @memberof Utilities */
 function clamp(value, min=0, max=1) { return value < min ? min : value > max ? max : value; }
@@ -489,17 +112,17 @@ function lerp(percent, valueA, valueB) { return valueA + clamp(percent) * (value
 /** Returns signed wrapped distance between the two values passed in
  *  @param {Number} valueA
  *  @param {Number} valueB
- *  @param {Number} [wrapSize=1]
+ *  @param {Number} [wrapSize]
  *  @returns {Number}
  *  @memberof Utilities */
 function distanceWrap(valueA, valueB, wrapSize=1)
 { const d = (valueA - valueB) % wrapSize; return d*2 % wrapSize - d; }
 
-/** Linearly interpolates between values passed in with wrappping
+/** Linearly interpolates between values passed in with wrapping
  *  @param {Number} percent
  *  @param {Number} valueA
  *  @param {Number} valueB
- *  @param {Number} [wrapSize=1]
+ *  @param {Number} [wrapSize]
  *  @returns {Number}
  *  @memberof Utilities */
 function lerpWrap(percent, valueA, valueB, wrapSize=1)
@@ -510,9 +133,9 @@ function lerpWrap(percent, valueA, valueB, wrapSize=1)
  *  @param {Number} angleB
  *  @returns {Number}
  *  @memberof Utilities */
-function distanceAngle(angleA, angleB) { distanceWrap(angleA, angleB, 2*PI); }
+function distanceAngle(angleA, angleB) { return distanceWrap(angleA, angleB, 2*PI); }
 
-/** Linearly interpolates between the angles passed in with wrappping
+/** Linearly interpolates between the angles passed in with wrapping
  *  @param {Number} percent
  *  @param {Number} angleA
  *  @param {Number} angleB
@@ -533,23 +156,64 @@ function smoothStep(percent) { return percent * percent * (3 - 2 * percent); }
 function nearestPowerOfTwo(value) { return 2**Math.ceil(Math.log2(value)); }
 
 /** Returns true if two axis aligned bounding boxes are overlapping 
- *  @param {Vector2} pointA  - Center of box A
- *  @param {Vector2} sizeA   - Size of box A
- *  @param {Vector2} pointB  - Center of box B
- *  @param {Vector2} sizeB   - Size of box B
- *  @return {Boolean}        - True if overlapping
+ *  @param {Vector2} posA          - Center of box A
+ *  @param {Vector2} sizeA         - Size of box A
+ *  @param {Vector2} posB          - Center of box B
+ *  @param {Vector2} [sizeB=(0,0)] - Size of box B, a point if undefined
+ *  @return {Boolean}              - True if overlapping
  *  @memberof Utilities */
-function isOverlapping(pointA, sizeA, pointB, sizeB)
+function isOverlapping(posA, sizeA, posB, sizeB=vec2())
 { 
-    return abs(pointA.x - pointB.x)*2 < sizeA.x + sizeB.x 
-        && abs(pointA.y - pointB.y)*2 < sizeA.y + sizeB.y;
+    return abs(posA.x - posB.x)*2 < sizeA.x + sizeB.x 
+        && abs(posA.y - posB.y)*2 < sizeA.y + sizeB.y;
+}
+
+/** Returns true if a line segment is intersecting an axis aligned box
+ *  @param {Vector2} start - Start of raycast
+ *  @param {Vector2} end   - End of raycast
+ *  @param {Vector2} pos   - Center of box
+ *  @param {Vector2} size  - Size of box
+ *  @return {Boolean}      - True if intersecting
+ *  @memberof Utilities */
+function isIntersecting(start, end, pos, size)
+{
+    // Liang-Barsky algorithm
+    const boxMin = pos.subtract(size.scale(.5));
+    const boxMax = boxMin.add(size);
+    const delta = end.subtract(start);
+    const a = start.subtract(boxMin);
+    const b = start.subtract(boxMax);
+    const p = [-delta.x, delta.x, -delta.y, delta.y];
+    const q = [a.x, -b.x, a.y, -b.y];
+    let tMin = 0, tMax = 1;
+    for (let i = 4; i--;)
+    {
+        if (p[i])
+        {
+            const t = q[i] / p[i];
+            if (p[i] < 0)
+            {
+                if (t > tMax) return false;
+                tMin = max(t, tMin);
+            }
+            else
+            {
+                if (t < tMin) return false;
+                tMax = min(t, tMax);
+            }
+        }
+        else if (q[i] < 0)
+            return false;
+    }
+
+    return true;
 }
 
 /** Returns an oscillating wave between 0 and amplitude with frequency of 1 Hz by default
- *  @param {Number} [frequency=1] - Frequency of the wave in Hz
- *  @param {Number} [amplitude=1] - Amplitude (max height) of the wave
- *  @param {Number} [t=time]      - Value to use for time of the wave
- *  @return {Number}              - Value waving between 0 and amplitude
+ *  @param {Number} [frequency] - Frequency of the wave in Hz
+ *  @param {Number} [amplitude] - Amplitude (max height) of the wave
+ *  @param {Number} [t=time]    - Value to use for time of the wave
+ *  @return {Number}            - Value waving between 0 and amplitude
  *  @memberof Utilities */
 function wave(frequency=1, amplitude=1, t=time)
 { return amplitude/2 * (1 - Math.cos(t*frequency*2*PI)); }
@@ -566,15 +230,15 @@ function formatTime(t) { return (t/60|0) + ':' + (t%60<10?'0':'') + (t%60|0); }
  *  @namespace Random */
 
 /** Returns a random value between the two values passed in
- *  @param {Number} [valueA=1]
- *  @param {Number} [valueB=0]
+ *  @param {Number} [valueA]
+ *  @param {Number} [valueB]
  *  @return {Number}
  *  @memberof Random */
 function rand(valueA=1, valueB=0) { return valueB + Math.random() * (valueA-valueB); }
 
 /** Returns a floored random value the two values passed in
  *  @param {Number} valueA
- *  @param {Number} [valueB=0]
+ *  @param {Number} [valueB]
  *  @return {Number}
  *  @memberof Random */
 function randInt(valueA, valueB=0) { return Math.floor(rand(valueA,valueB)); }
@@ -585,26 +249,26 @@ function randInt(valueA, valueB=0) { return Math.floor(rand(valueA,valueB)); }
 function randSign() { return randInt(2) * 2 - 1; }
 
 /** Returns a random Vector2 with the passed in length
- *  @param {Number} [length=1]
+ *  @param {Number} [length]
  *  @return {Vector2}
  *  @memberof Random */
 function randVector(length=1) { return new Vector2().setAngle(rand(2*PI), length); }
 
 /** Returns a random Vector2 within a circular shape
- *  @param {Number} [radius=1]
- *  @param {Number} [minRadius=0]
+ *  @param {Number} [radius]
+ *  @param {Number} [minRadius]
  *  @return {Vector2}
  *  @memberof Random */
 function randInCircle(radius=1, minRadius=0)
 { return radius > 0 ? randVector(radius * rand(minRadius / radius, 1)**.5) : new Vector2; }
 
 /** Returns a random color between the two passed in colors, combine components if linear
- *  @param {Color}   [colorA=Color()]
- *  @param {Color}   [colorB=Color(0,0,0,1)]
+ *  @param {Color}   [colorA=(1,1,1,1)]
+ *  @param {Color}   [colorB=(0,0,0,1)]
  *  @param {Boolean} [linear]
  *  @return {Color}
  *  @memberof Random */
-function randColor(colorA=new Color, colorB=new Color(0,0,0,1), linear)
+function randColor(colorA=new Color, colorB=new Color(0,0,0,1), linear=false)
 {
     return linear ? colorA.lerp(colorB, rand()) : 
         new Color(rand(colorA.r,colorB.r), rand(colorA.g,colorB.g), rand(colorA.b,colorB.b), rand(colorA.a,colorB.a));
@@ -633,8 +297,8 @@ class RandomGenerator
     }
 
     /** Returns a seeded random value between the two values passed in
-    *  @param {Number} [valueA=1]
-    *  @param {Number} [valueB=0]
+    *  @param {Number} [valueA]
+    *  @param {Number} [valueB]
     *  @return {Number} */
     float(valueA=1, valueB=0)
     {
@@ -647,7 +311,7 @@ class RandomGenerator
 
     /** Returns a floored seeded random value the two values passed in
     *  @param {Number} valueA
-    *  @param {Number} [valueB=0]
+    *  @param {Number} [valueB]
     *  @return {Number} */
     int(valueA, valueB=0) { return Math.floor(this.float(valueA, valueB)); }
 
@@ -660,8 +324,8 @@ class RandomGenerator
 
 /** 
  * Create a 2d vector, can take another Vector2 to copy, 2 scalars, or 1 scalar
- * @param {(Number|Vector2)} [x=0]
- * @param {Number} [y=0]
+ * @param {(Number|Vector2)} [x]
+ * @param {Number} [y]
  * @return {Vector2}
  * @example
  * let a = vec2(0, 1); // vector with coordinates (0, 1)
@@ -671,15 +335,19 @@ class RandomGenerator
  * @memberof Utilities
  */
 function vec2(x=0, y)
-{ return x.x == undefined ? new Vector2(x, y == undefined? x : y) : new Vector2(x.x, x.y); }
+{
+    return typeof x === 'number' ? 
+        new Vector2(x, y == undefined? x : y) : 
+        new Vector2(x.x, x.y);
+}
 
 /** 
  * Check if object is a valid Vector2
- * @param {Vector2} v
+ * @param {any} v
  * @return {Boolean}
  * @memberof Utilities
  */
-function isVector2(v) { return !isNaN(v.x) && !isNaN(v.y); }
+function isVector2(v) { return v instanceof Vector2; }
 
 /** 
  * 2D Vector object with vector math library
@@ -693,8 +361,8 @@ function isVector2(v) { return !isNaN(v.x) && !isNaN(v.y); }
 class Vector2
 {
     /** Create a 2D vector with the x and y passed in, can also be created with vec2()
-     *  @param {Number} [x=0] - X axis location
-     *  @param {Number} [y=0] - Y axis location */
+     *  @param {Number} [x] - X axis location
+     *  @param {Number} [y] - Y axis location */
     constructor(x=0, y=0)
     {
         /** @property {Number} - X axis location */
@@ -710,27 +378,47 @@ class Vector2
     /** Returns a copy of this vector plus the vector passed in
      *  @param {Vector2} v - other vector
      *  @return {Vector2} */
-    add(v) { ASSERT(isVector2(v)); return new Vector2(this.x + v.x, this.y + v.y); }
+    add(v)
+    {
+        ASSERT(isVector2(v));
+        return new Vector2(this.x + v.x, this.y + v.y);
+    }
 
     /** Returns a copy of this vector minus the vector passed in
      *  @param {Vector2} v - other vector
      *  @return {Vector2} */
-    subtract(v) { ASSERT(isVector2(v)); return new Vector2(this.x - v.x, this.y - v.y); }
+    subtract(v)
+    {
+        ASSERT(isVector2(v));
+        return new Vector2(this.x - v.x, this.y - v.y);
+    }
 
     /** Returns a copy of this vector times the vector passed in
      *  @param {Vector2} v - other vector
      *  @return {Vector2} */
-    multiply(v) { ASSERT(isVector2(v)); return new Vector2(this.x * v.x, this.y * v.y); }
+    multiply(v)
+    {
+        ASSERT(isVector2(v));
+        return new Vector2(this.x * v.x, this.y * v.y);
+    }
 
     /** Returns a copy of this vector divided by the vector passed in
      *  @param {Vector2} v - other vector
      *  @return {Vector2} */
-    divide(v) { ASSERT(isVector2(v)); return new Vector2(this.x / v.x, this.y / v.y); }
+    divide(v)
+    {
+        ASSERT(isVector2(v));
+        return new Vector2(this.x / v.x, this.y / v.y);
+    }
 
     /** Returns a copy of this vector scaled by the vector passed in
      *  @param {Number} s - scale
      *  @return {Vector2} */
-    scale(s) { ASSERT(!isVector2(s)); return new Vector2(this.x * s, this.y * s); }
+    scale(s)
+    {
+        ASSERT(!isVector2(s));
+        return new Vector2(this.x * s, this.y * s);
+    }
 
     /** Returns the length of this vector
      * @return {Number} */
@@ -743,43 +431,71 @@ class Vector2
     /** Returns the distance from this vector to vector passed in
      * @param {Vector2} v - other vector
      * @return {Number} */
-    distance(v) { return this.distanceSquared(v)**.5; }
+    distance(v)
+    {
+        ASSERT(isVector2(v));
+        return this.distanceSquared(v)**.5;
+    }
 
     /** Returns the distance squared from this vector to vector passed in
      * @param {Vector2} v - other vector
      * @return {Number} */
-    distanceSquared(v) { return (this.x - v.x)**2 + (this.y - v.y)**2; }
+    distanceSquared(v)
+    {
+        ASSERT(isVector2(v));
+        return (this.x - v.x)**2 + (this.y - v.y)**2;
+    }
 
     /** Returns a new vector in same direction as this one with the length passed in
-     * @param {Number} [length=1]
+     * @param {Number} [length]
      * @return {Vector2} */
-    normalize(length=1) { const l = this.length(); return l ? this.scale(length/l) : new Vector2(0, length); }
+    normalize(length=1)
+    {
+        const l = this.length();
+        return l ? this.scale(length/l) : new Vector2(0, length);
+    }
 
     /** Returns a new vector clamped to length passed in
-     * @param {Number} [length=1]
+     * @param {Number} [length]
      * @return {Vector2} */
-    clampLength(length=1) { const l = this.length(); return l > length ? this.scale(length/l) : this; }
+    clampLength(length=1)
+    {
+        const l = this.length();
+        return l > length ? this.scale(length/l) : this;
+    }
 
     /** Returns the dot product of this and the vector passed in
      * @param {Vector2} v - other vector
      * @return {Number} */
-    dot(v) { ASSERT(isVector2(v)); return this.x*v.x + this.y*v.y; }
+    dot(v)
+    {
+        ASSERT(isVector2(v));
+        return this.x*v.x + this.y*v.y;
+    }
 
     /** Returns the cross product of this and the vector passed in
      * @param {Vector2} v - other vector
      * @return {Number} */
-    cross(v) { ASSERT(isVector2(v)); return this.x*v.y - this.y*v.x; }
+    cross(v)
+    {
+        ASSERT(isVector2(v));
+        return this.x*v.y - this.y*v.x;
+    }
 
     /** Returns the angle of this vector, up is angle 0
      * @return {Number} */
     angle() { return Math.atan2(this.x, this.y); }
 
     /** Sets this vector with angle and length passed in
-     * @param {Number} [angle=0]
-     * @param {Number} [length=1]
+     * @param {Number} [angle]
+     * @param {Number} [length]
      * @return {Vector2} */
     setAngle(angle=0, length=1) 
-    { this.x = length*Math.sin(angle); this.y = length*Math.cos(angle); return this; }
+    {
+        this.x = length*Math.sin(angle);
+        this.y = length*Math.cos(angle);
+        return this;
+    }
 
     /** Returns copy of this vector rotated by the angle passed in
      * @param {Number} angle
@@ -790,9 +506,20 @@ class Vector2
         return new Vector2(this.x*c - this.y*s, this.x*s + this.y*c);
     }
 
+    /** Set the integer direction of this vector, corrosponding to multiples of 90 degree rotation (0-3)
+     * @param {Number} [direction]
+     * @param {Number} [length] */
+    setDirection(direction, length=1)
+    {
+        ASSERT(direction==0 || direction==1 || direction==2 || direction==3);
+        return vec2(direction%2 ? direction-1 ? -length : length : 0, 
+            direction%2 ? 0 : direction ? -length : length);
+    }
+
     /** Returns the integer direction of this vector, corrosponding to multiples of 90 degree rotation (0-3)
      * @return {Number} */
-    direction() { return abs(this.x) > abs(this.y) ? this.x < 0 ? 3 : 1 : this.y < 0 ? 2 : 0; }
+    direction()
+    { return abs(this.x) > abs(this.y) ? this.x < 0 ? 3 : 1 : this.y < 0 ? 2 : 0; }
 
     /** Returns a copy of this vector that has been inverted
      * @return {Vector2} */
@@ -811,24 +538,34 @@ class Vector2
      * @param {Number}  percent
      * @return {Vector2} */
     lerp(v, percent)
-    { ASSERT(isVector2(v)); return this.add(v.subtract(this).scale(clamp(percent))); }
+    {
+        ASSERT(isVector2(v));
+        return this.add(v.subtract(this).scale(clamp(percent)));
+    }
 
     /** Returns true if this vector is within the bounds of an array size passed in
      * @param {Vector2} arraySize
      * @return {Boolean} */
-    arrayCheck(arraySize) { return this.x >= 0 && this.y >= 0 && this.x < arraySize.x && this.y < arraySize.y; }
+    arrayCheck(arraySize)
+    {
+        ASSERT(isVector2(arraySize));
+        return this.x >= 0 && this.y >= 0 && this.x < arraySize.x && this.y < arraySize.y;
+    }
 
     /** Returns this vector expressed as a string
      * @param {Number} digits - precision to display
      * @return {String} */
     toString(digits=3) 
-    { if (debug) { return `(${(this.x<0?'':' ') + this.x.toFixed(digits)},${(this.y<0?'':' ') + this.y.toFixed(digits)} )`; }}
+    {
+        if (debug)
+            return `(${(this.x<0?'':' ') + this.x.toFixed(digits)},${(this.y<0?'':' ') + this.y.toFixed(digits)} )`;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /** 
- * Create a color object with RGBA values
+ * Create a color object with RGBA values, white by default
  * @param {Number} [r=1] - red
  * @param {Number} [g=1] - green
  * @param {Number} [b=1] - blue
@@ -839,7 +576,7 @@ class Vector2
 function rgb(r, g, b, a) { return new Color(r, g, b, a); }
 
 /** 
- * Create a color object with HSLA values
+ * Create a color object with HSLA values, white by default
  * @param {Number} [h=0] - hue
  * @param {Number} [s=0] - saturation
  * @param {Number} [l=1] - lightness
@@ -850,21 +587,29 @@ function rgb(r, g, b, a) { return new Color(r, g, b, a); }
 function hsl(h, s, l, a) { return new Color().setHSLA(h, s, l, a); }
 
 /** 
+ * Check if object is a valid Color
+ * @param {any} c
+ * @return {Boolean}
+ * @memberof Utilities
+ */
+function isColor(c) { return c instanceof Color; }
+
+/** 
  * Color object (red, green, blue, alpha) with some helpful functions
  * @example
  * let a = new Color;              // white
  * let b = new Color(1, 0, 0);     // red
  * let c = new Color(0, 0, 0, 0);  // transparent black
- * let d = RGB(0, 0, 1);           // blue using rgb color
- * let e = HSL(.3, 1, .5);         // green using hsl color
+ * let d = rgb(0, 0, 1);           // blue using rgb color
+ * let e = hsl(.3, 1, .5);         // green using hsl color
  */
 class Color
 {
     /** Create a color with the rgba components passed in, white by default
-     *  @param {Number} [r=1] - red
-     *  @param {Number} [g=1] - green
-     *  @param {Number} [b=1] - blue
-     *  @param {Number} [a=1] - alpha*/
+     *  @param {Number} [r] - red
+     *  @param {Number} [g] - green
+     *  @param {Number} [b] - blue
+     *  @param {Number} [a] - alpha*/
     constructor(r=1, g=1, b=1, a=1)
     {
         /** @property {Number} - Red */
@@ -884,22 +629,38 @@ class Color
     /** Returns a copy of this color plus the color passed in
      * @param {Color} c - other color
      * @return {Color} */
-    add(c) { return new Color(this.r+c.r, this.g+c.g, this.b+c.b, this.a+c.a); }
+    add(c)
+    {
+        ASSERT(isColor(c));
+        return new Color(this.r+c.r, this.g+c.g, this.b+c.b, this.a+c.a);
+    }
 
     /** Returns a copy of this color minus the color passed in
      * @param {Color} c - other color
      * @return {Color} */
-    subtract(c) { return new Color(this.r-c.r, this.g-c.g, this.b-c.b, this.a-c.a); }
+    subtract(c)
+    {
+        ASSERT(isColor(c));
+        return new Color(this.r-c.r, this.g-c.g, this.b-c.b, this.a-c.a);
+    }
 
     /** Returns a copy of this color times the color passed in
      * @param {Color} c - other color
      * @return {Color} */
-    multiply(c) { return new Color(this.r*c.r, this.g*c.g, this.b*c.b, this.a*c.a); }
+    multiply(c)
+    {
+        ASSERT(isColor(c));
+        return new Color(this.r*c.r, this.g*c.g, this.b*c.b, this.a*c.a);
+    }
 
     /** Returns a copy of this color divided by the color passed in
      * @param {Color} c - other color
      * @return {Color} */
-    divide(c) { return new Color(this.r/c.r, this.g/c.g, this.b/c.b, this.a/c.a); }
+    divide(c)
+    {
+        ASSERT(isColor(c));
+        return new Color(this.r/c.r, this.g/c.g, this.b/c.b, this.a/c.a);
+    }
 
     /** Returns a copy of this color scaled by the value passed in, alpha can be scaled separately
      * @param {Number} scale
@@ -916,13 +677,17 @@ class Color
      * @param {Color}  c - other color
      * @param {Number} percent
      * @return {Color} */
-    lerp(c, percent) { return this.add(c.subtract(this).scale(clamp(percent))); }
+    lerp(c, percent)
+    {
+        ASSERT(isColor(c));
+        return this.add(c.subtract(this).scale(clamp(percent)));
+    }
 
     /** Sets this color given a hue, saturation, lightness, and alpha
-     * @param {Number} [h=0] - hue
-     * @param {Number} [s=0] - saturation
-     * @param {Number} [l=1] - lightness
-     * @param {Number} [a=1] - alpha
+     * @param {Number} [h] - hue
+     * @param {Number} [s] - saturation
+     * @param {Number} [l] - lightness
+     * @param {Number} [a] - alpha
      * @return {Color} */
     setHSLA(h=0, s=0, l=1, a=1)
     {
@@ -941,7 +706,7 @@ class Color
 
     /** Returns this color expressed in hsla format
      * @return {Array} */
-    getHSLA()
+    HSLA()
     {
         const r = clamp(this.r);
         const g = clamp(this.g);
@@ -968,8 +733,8 @@ class Color
     }
 
     /** Returns a new color that has each component randomly adjusted
-     * @param {Number} [amount=.05]
-     * @param {Number} [alphaAmount=0]
+     * @param {Number} [amount]
+     * @param {Number} [alphaAmount]
      * @return {Color} */
     mutate(amount=.05, alphaAmount=0) 
     {
@@ -983,9 +748,9 @@ class Color
     }
 
     /** Returns this color expressed as a hex color code
-     * @param {Boolean} [useAlpha=1] - if alpha should be included in result
+     * @param {Boolean} [useAlpha] - if alpha should be included in result
      * @return {String} */
-    toString(useAlpha = 1)      
+    toString(useAlpha = true)      
     { 
         const toHex = (c)=> ((c=c*255|0)<16 ? '0' : '') + c.toString(16);
         return '#' + toHex(this.r) + toHex(this.g) + toHex(this.b) + (useAlpha ? toHex(this.a) : '');
@@ -1008,11 +773,10 @@ class Color
      * @return {Number} */
     rgbaInt()  
     {
-        const toByte = (c)=> clamp(c)*255|0;
-        const r = toByte(this.r);
-        const g = toByte(this.g)<<8;
-        const b = toByte(this.b)<<16;
-        const a = toByte(this.a)<<24;
+        const r = clamp(this.r)*255|0;
+        const g = clamp(this.g)*255<<8;
+        const b = clamp(this.b)*255<<16;
+        const a = clamp(this.a)*255<<24;
         return r + g + b + a;
     }
 }
@@ -1035,7 +799,7 @@ class Timer
     constructor(timeLeft) { this.time = timeLeft == undefined ? undefined : time + timeLeft; this.setTime = timeLeft; }
 
     /** Set the timer with seconds passed in
-     *  @param {Number} [timeLeft=0] - How much time left before the timer is elapsed in seconds */
+     *  @param {Number} [timeLeft] - How much time left before the timer is elapsed in seconds */
     set(timeLeft=0) { this.time = time + timeLeft; this.setTime = timeLeft; }
 
     /** Unset the timer */
@@ -1112,13 +876,19 @@ let canvasFixedSize = vec2();
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let canvasPixelated = 1;
+let canvasPixelated = true;
 
 /** Default font used for text rendering
  *  @type {String}
  *  @default
  *  @memberof Settings */
 let fontDefault = 'arial';
+
+/** Enable to show the LittleJS splash screen be shown on startup
+ *  @type {Boolean}
+ *  @default
+ *  @memberof Settings */
+let showSplashScreen = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // WebGL settings
@@ -1127,13 +897,13 @@ let fontDefault = 'arial';
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let glEnable = 1;
+let glEnable = true;
 
 /** Fixes slow rendering in some browsers by not compositing the WebGL canvas
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let glOverlay = 1;
+let glOverlay = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tile sheet settings
@@ -1148,7 +918,7 @@ let tileSizeDefault = vec2(16);
  *  @type {Number}
  *  @default
  *  @memberof Settings */
-let tileFixBleedScale = .3;
+let tileFixBleedScale = .1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Object settings
@@ -1157,9 +927,9 @@ let tileFixBleedScale = .3;
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let enablePhysicsSolver = 1;
+let enablePhysicsSolver = true;
 
-/** Default object mass for collison calcuations (how heavy objects are)
+/** Default object mass for collision calcuations (how heavy objects are)
  *  @type {Number}
  *  @default
  *  @memberof Settings */
@@ -1179,7 +949,7 @@ let objectDefaultAngleDamping = 1;
 
 /** How much to bounce when a collision occurs (0-1)
  *  @type {Number}
- *  @default 0
+ *  @default
  *  @memberof Settings */
 let objectDefaultElasticity = 0;
 
@@ -1197,7 +967,7 @@ let objectMaxSpeed = 1;
 
 /** How much gravity to apply to objects along the Y axis, negative is down
  *  @type {Number}
- *  @default 0
+ *  @default
  *  @memberof Settings */
 let gravity = 0;
 
@@ -1214,35 +984,35 @@ let particleEmitRateScale = 1;
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let gamepadsEnable = 1;
+let gamepadsEnable = true;
 
 /** If true, the dpad input is also routed to the left analog stick (for better accessability)
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let gamepadDirectionEmulateStick = 1;
+let gamepadDirectionEmulateStick = true;
 
 /** If true the WASD keys are also routed to the direction keys (for better accessability)
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let inputWASDEmulateDirection = 1;
+let inputWASDEmulateDirection = true;
 
 /** True if touch gamepad should appear on mobile devices
  *  - Supports left analog stick, 4 face buttons and start button (button 9)
  *  - Must be set by end of gameInit to be activated
  *  @type {Boolean}
- *  @default 0
+ *  @default
  *  @memberof Settings */
-let touchGamepadEnable = 0;
+let touchGamepadEnable = false;
 
 /** True if touch gamepad should be analog stick or false to use if 8 way dpad
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let touchGamepadAnalog = 1;
+let touchGamepadAnalog = true;
 
-/** Size of virutal gamepad for touch devices in pixels
+/** Size of virtual gamepad for touch devices in pixels
  *  @type {Number}
  *  @default
  *  @memberof Settings */
@@ -1258,7 +1028,7 @@ let touchGamepadAlpha = .3;
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let vibrateEnable = 1;
+let vibrateEnable = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Audio settings
@@ -1267,7 +1037,7 @@ let vibrateEnable = 1;
  *  @type {Boolean}
  *  @default
  *  @memberof Settings */
-let soundEnable = 1;
+let soundEnable = true;
 
 /** Volume scale to apply to all sound, music and speech
  *  @type {Number}
@@ -1316,9 +1086,9 @@ let medalDisplayIconSize = 50;
 
 /** Set to stop medals from being unlockable (like if cheats are enabled)
  *  @type {Boolean}
- *  @default 0
+ *  @default
  *  @memberof Settings */
-let medalsPreventUnlock;
+let medalsPreventUnlock = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Setters for global variables
@@ -1353,6 +1123,11 @@ function setCanvasPixelated(pixelated) { canvasPixelated = pixelated; }
  *  @memberof Settings */
 function setFontDefault(font) { fontDefault = font; }
 
+/** Set if the LittleJS splash screen be shown on startup
+ *  @param {Boolean} show
+ *  @memberof Settings */
+function setShowSplashScreen(show) { showSplashScreen = show; }
+
 /** Set if webgl rendering is enabled
  *  @param {Boolean} enable
  *  @memberof Settings */
@@ -1384,12 +1159,12 @@ function setEnablePhysicsSolver(enable) { enablePhysicsSolver = enable; }
 function setObjectDefaultMass(mass) { objectDefaultMass = mass; }
 
 /** Set how much to slow velocity by each frame
- *  @param {Number} damping
+ *  @param {Number} damp
  *  @memberof Settings */
 function setObjectDefaultDamping(damp) { objectDefaultDamping = damp; }
 
 /** Set how much to slow angular velocity each frame
- *  @param {Number} damping
+ *  @param {Number} damp
  *  @memberof Settings */
 function setObjectDefaultAngleDamping(damp) { objectDefaultAngleDamping = damp; }
 
@@ -1409,9 +1184,9 @@ function setObjectDefaultFriction(friction) { objectDefaultFriction = friction; 
 function setObjectMaxSpeed(speed) { objectMaxSpeed = speed; }
 
 /** Set how much gravity to apply to objects along the Y axis
- *  @param {Number} gravity
+ *  @param {Number} newGravity
  *  @memberof Settings */
-function setGravity(g) { gravity = g; }
+function setGravity(newGravity) { gravity = newGravity; }
 
 /** Set to scales emit rate of particles
  *  @param {Number} scale
@@ -1509,7 +1284,7 @@ function setMedalsPreventUnlock(preventUnlock) { medalsPreventUnlock = preventUn
 function setShowWatermark(show) { showWatermark = show; }
 
 /** Set key code used to toggle debug mode, Esc by default
- *  @param {Number} key
+ *  @param {String} key
  *  @memberof Debug */
 function setDebugKey(key) { debugKey = key; }
 /** 
@@ -1524,7 +1299,7 @@ function setDebugKey(key) { debugKey = key; }
  * - Automatically adds self to object list
  * - Will be updated and rendered each frame
  * - Renders as a sprite from a tilesheet by default
- * - Can have color and addtive color applied
+ * - Can have color and additive color applied
  * - 2D Physics and collision system
  * - Sorted by renderOrder
  * - Objects can have children attached
@@ -1546,27 +1321,25 @@ function setDebugKey(key) { debugKey = key; }
 class EngineObject
 {
     /** Create an engine object and adds it to the list of objects
-     *  @param {Vector2} [pos=Vector2()]            - World space position of the object
-     *  @param {Vector2} [size=Vector2(1,1)]        - World space size of the object
-     *  @param {TileInfo} [tileInfo]                - Tile info to render object (undefined is untextured)
-     *  @param {Number}  [angle=0]                  - Angle the object is rotated by
-     *  @param {Color}   [color=Color()]            - Color to apply to tile when rendered
-     *  @param {Number}  [renderOrder=0]            - Objects sorted by renderOrder before being rendered
+     *  @param {Vector2}  [pos=(0,0)]       - World space position of the object
+     *  @param {Vector2}  [size=(1,1)]      - World space size of the object
+     *  @param {TileInfo} [tileInfo]        - Tile info to render object (undefined is untextured)
+     *  @param {Number}   [angle]           - Angle the object is rotated by
+     *  @param {Color}    [color=(1,1,1,1)] - Color to apply to tile when rendered
+     *  @param {Number}   [renderOrder]     - Objects sorted by renderOrder before being rendered
      */
     constructor(pos=vec2(), size=vec2(1), tileInfo, angle=0, color, renderOrder=0)
     {
         // set passed in params
-        ASSERT(isVector2(pos) && isVector2(size)); // ensure pos and size are vec2s
-        ASSERT(typeof tileInfo !== 'number' || !tileInfo); // prevent old style calls
-        ASSERT(!(renderOrder instanceof Color)); // prevent old style calls
-        // to fix old calls, replace with tile(tileIndex, tileSize)
+        ASSERT(isVector2(pos) && isVector2(size), 'ensure pos and size are vec2s');
+        ASSERT(typeof tileInfo !== 'number' || !tileInfo, 'old style tile setup');
 
         /** @property {Vector2} - World space position of the object */
         this.pos = pos.copy();
         /** @property {Vector2} - World space width and height of the object */
         this.size = size;
         /** @property {Vector2} - Size of object used for drawing, uses size if not set */
-        this.drawSize;
+        this.drawSize = undefined;
         /** @property {TileInfo} - Tile info to render object (undefined is untextured) */
         this.tileInfo = tileInfo;
         /** @property {Number}  - Angle to rotate the object */
@@ -1574,9 +1347,11 @@ class EngineObject
         /** @property {Color}   - Color to apply when rendered */
         this.color = color;
         /** @property {Color}   - Additive color to apply when rendered */
-        this.additiveColor;
+        this.additiveColor = undefined;
+        /** @property {Boolean} - Should it flip along y axis when rendered */
+        this.mirror = false;
 
-        // set object defaults
+        // physical properties
         /** @property {Number} [mass=objectDefaultMass]                 - How heavy the object is, static if 0 */
         this.mass         = objectDefaultMass;
         /** @property {Number} [damping=objectDefaultDamping]           - How much to slow down velocity each frame (0-1) */
@@ -1587,19 +1362,36 @@ class EngineObject
         this.elasticity   = objectDefaultElasticity;
         /** @property {Number} [friction=objectDefaultFriction]         - How much friction to apply when sliding (0-1) */
         this.friction     = objectDefaultFriction;
-        /** @property {Number} [gravityScale=1]                         - How much to scale gravity by for this object */
+        /** @property {Number}  - How much to scale gravity by for this object */
         this.gravityScale = 1;
-        /** @property {Number} [renderOrder=0]                          - Objects are sorted by render order */
+        /** @property {Number}  - Objects are sorted by render order */
         this.renderOrder = renderOrder;
-        /** @property {Vector2} [velocity=Vector2()]                    - Velocity of the object */
+        /** @property {Vector2} - Velocity of the object */
         this.velocity = vec2();
-        /** @property {Number} [angleVelocity=0]                        - Angular velocity of the object */
+        /** @property {Number}  - Angular velocity of the object */
         this.angleVelocity = 0;
-
-        // init other internal object stuff
+        /** @property {Number}  - Track when object was created  */
         this.spawnTime = time;
+        /** @property {Array}   - List of children of this object */
         this.children = [];
+
+        // parent child system
+        /** @property {EngineObject} - Parent of object if in local space  */
+        this.parent = undefined;
+        /** @property {Vector2}      - Local position if child */
+        this.localPos = vec2();
+        /** @property {Number}       - Local angle if child  */
+        this.localAngle = 0;
+
+        // collision flags
+        /** @property {Boolean} - Object collides with the tile collision */
         this.collideTiles = false;
+        /** @property {Boolean} - Object collides with solid objects */
+        this.collideSolidObjects = false;
+        /** @property {Boolean} - Object collides with and blocks other objects */
+        this.isSolid = false;
+        /** @property {Boolean} - Object collides with raycasts */
+        this.collideRaycast = false;
 
         // add to list of objects
         engineObjects.push(this);
@@ -1788,7 +1580,7 @@ class EngineObject
     }
     
     /** Destroy this object, destroy it's children, detach it's parent, and mark it for removal */
-    destroy()             
+    destroy()
     { 
         if (this.destroyed)
             return;
@@ -1804,19 +1596,13 @@ class EngineObject
      *  @param {Number}  tileData - the value of the tile at the position
      *  @param {Vector2} pos      - tile where the collision occured
      *  @return {Boolean}         - true if the collision should be resolved */
-    collideWithTile(tileData, pos)        { return tileData > 0; }
-    
-    /** Called to check if a tile raycast hit
-     *  @param {Number}  tileData - the value of the tile at the position
-     *  @param {Vector2} pos      - tile where the raycast is
-     *  @return {Boolean}         - true if the raycast should hit */
-    collideWithTileRaycast(tileData, pos) { return tileData > 0; }
+    collideWithTile(tileData, pos)    { return tileData > 0; }
 
     /** Called to check if a object collision should be resolved
      *  @param {EngineObject} object - the object to test against
      *  @return {Boolean}            - true if the collision should be resolved
      */
-    collideWithObject(object)         { return 1; }
+    collideWithObject(object)         { return true; }
 
     /** How long since the object was created
      *  @return {Number} */
@@ -1836,8 +1622,8 @@ class EngineObject
 
     /** Attaches a child to this with a given local transform
      *  @param {EngineObject} child
-     *  @param {Vector2}      [localPos=Vector2()]
-     *  @param {Number}       [localAngle=0] */
+     *  @param {Vector2}      [localPos=(0,0)]
+     *  @param {Number}       [localAngle] */
     addChild(child, localPos=vec2(), localAngle=0)
     {
         ASSERT(!child.parent && !this.children.includes(child));
@@ -1857,16 +1643,18 @@ class EngineObject
     }
 
     /** Set how this object collides
-     *  @param {Boolean} [collideSolidObjects=1] - Does it collide with solid objects
-     *  @param {Boolean} [isSolid=1]             - Does it collide with and block other objects (expensive in large numbers)
-     *  @param {Boolean} [collideTiles=1]        - Does it collide with the tile collision */
-    setCollision(collideSolidObjects=1, isSolid=1, collideTiles=1)
+     *  @param {Boolean} [collideSolidObjects] - Does it collide with solid objects?
+     *  @param {Boolean} [isSolid]             - Does it collide with and block other objects? (expensive in large numbers)
+     *  @param {Boolean} [collideTiles]        - Does it collide with the tile collision?
+     *  @param {Boolean} [collideRaycast]      - Does it collide with raycasts? */
+    setCollision(collideSolidObjects=true, isSolid=true, collideTiles=true, collideRaycast=true)
     {
-        ASSERT(collideSolidObjects || !isSolid); // solid objects must be set to collide
+        ASSERT(collideSolidObjects || !isSolid, 'solid objects must be set to collide');
 
         this.collideSolidObjects = collideSolidObjects;
         this.isSolid = isSolid;
         this.collideTiles = collideTiles;
+        this.collideRaycast = collideRaycast;
     }
 
     /** Returns string containg info about this object for debugging
@@ -1944,7 +1732,7 @@ let mainCanvasSize = vec2();
  *  @memberof Draw */
 let textureInfos = [];
 
-// Engine internal variables not exposed to documentation
+// Keep track of how many draw calls there were each frame for debugging
 let drawCount;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1953,9 +1741,9 @@ let drawCount;
  * Create a tile info object
  * - This can take vecs or floats for easier use and conversion
  * - If an index is passed in, the tile size and index will determine the position
- * @param {(Number|Vector2)} [pos=Vector2()]         - Top left corner of tile in pixels or index
- * @param {(Number|Vector2)} [size=tileSizeDefault]  - Size of tile in pixels
- * @param {Number} [textureIndex=0]                  - Texture index to use
+ * @param {(Number|Vector2)} [pos=(0,0)]            - Top left corner of tile in pixels or index
+ * @param {(Number|Vector2)} [size=tileSizeDefault] - Size of tile in pixels
+ * @param {Number} [textureIndex]                   - Texture index to use
  * @return {TileInfo}
  * @example
  * tile(2)                       // a tile at index 2 using the default tile size of 16
@@ -1967,23 +1755,19 @@ let drawCount;
 function tile(pos=vec2(), size=tileSizeDefault, textureIndex=0)
 {
     // if size is a number, make it a vector
-    if (size.x == undefined)
+    if (typeof size === 'number')
     {
         ASSERT(size > 0);
         size = vec2(size);
     }
 
     // if pos is a number, use it as a tile index
-    if (pos.x == undefined)
+    if (typeof pos === 'number')
     {
         const textureInfo = textureInfos[textureIndex];
-        if (textureInfo)
-        {
-            const cols = textureInfo.size.x / size.x |0;
-            pos = vec2((pos%cols)*size.x, (pos/cols|0)*size.y);
-        }
-        else
-            pos = vec2();
+        ASSERT(textureInfo, 'Texture not loaded');
+        const cols = textureInfo.size.x / size.x |0;
+        pos = vec2((pos%cols)*size.x, (pos/cols|0)*size.y);
     }
 
     // return a tile info object
@@ -1996,9 +1780,9 @@ function tile(pos=vec2(), size=tileSizeDefault, textureIndex=0)
 class TileInfo
 {
     /** Create a tile info object
-     *  @param {Vector2} [pos=Vector2()]        - Top left corner of tile in pixels
+     *  @param {Vector2} [pos=(0,0)]            - Top left corner of tile in pixels
      *  @param {Vector2} [size=tileSizeDefault] - Size of tile in pixels
-     *  @param {Number}  [textureIndex=0]       - Texture index to use
+     *  @param {Number}  [textureIndex]         - Texture index to use
      */
     constructor(pos=vec2(), size=tileSizeDefault, textureIndex=0)
     {
@@ -2010,12 +1794,22 @@ class TileInfo
         this.textureIndex = textureIndex;
     }
 
-    /** Returns an offset copy of this tile, useful for animation
+    /** Returns a copy of this tile offset by a vector
     *  @param {Vector2} offset - Offset to apply in pixels
     *  @return {TileInfo}
     */
     offset(offset)
     { return new TileInfo(this.pos.add(offset), this.size, this.textureIndex); }
+
+    /** Returns a copy of this tile offset by a number of animation frames
+    *  @param {Number} frame - Offset to apply in animation frames
+    *  @return {TileInfo}
+    */
+    frame(frame)
+    {
+        ASSERT(typeof frame == 'number');
+        return this.offset(vec2(frame*this.size.x, 0));
+    }
 
     /** Returns the texture info for this tile
     *  @return {TextureInfo}
@@ -2027,10 +1821,13 @@ class TileInfo
 /** Texture Info - Stores info about each texture */
 class TextureInfo
 {
-    // create a TextureInfo, called automatically by the engine
+    /**
+     * Create a TextureInfo, called automatically by the engine
+     * @param {HTMLImageElement} image
+     */
     constructor(image)
     {
-        /** @property {CanvasImageSource} - image source */
+        /** @property {HTMLImageElement} - image source */
         this.image = image;
         /** @property {Vector2} - size of the image */
         this.size = vec2(image.width, image.height);
@@ -2069,27 +1866,30 @@ function worldToScreen(worldPos)
     );
 }
 
+/** Get the camera's visible area in world space
+ *  @return {Vector2}
+ *  @memberof Draw */
+function getCameraSize() { return mainCanvasSize.scale(1/cameraScale); }
+
 /** Draw textured tile centered in world space, with color applied if using WebGL
- *  @param {Vector2} pos                            - Center of the tile in world space
- *  @param {Vector2} [size=Vector2(1,1)]            - Size of the tile in world space
- *  @param {TileInfo}[tileInfo]                     - Tile info to use, untextured if undefined
- *  @param {Vector2} [tileSize=tileSizeDefault]     - Tile size in source pixels
- *  @param {Color}   [color=Color()]                - Color to modulate with
- *  @param {Number}  [angle=0]                      - Angle to rotate by
- *  @param {Boolean} [mirror=0]                     - If true image is flipped along the Y axis
- *  @param {Color}   [additiveColor=Color(0,0,0,0)] - Additive color to be applied
- *  @param {Boolean} [useWebGL=glEnable]            - Use accelerated WebGL rendering
- *  @param {Boolean} [screenSpace=0]                - If true the pos and size are in screen space
- *  @param {CanvasRenderingContext2D} [context]     - Canvas 2D context to draw to
+ *  @param {Vector2} pos                        - Center of the tile in world space
+ *  @param {Vector2} [size=(1,1)]               - Size of the tile in world space
+ *  @param {TileInfo}[tileInfo]                 - Tile info to use, untextured if undefined
+ *  @param {Color}   [color=(1,1,1,1)]          - Color to modulate with
+ *  @param {Number}  [angle]                    - Angle to rotate by
+ *  @param {Boolean} [mirror]                   - If true image is flipped along the Y axis
+ *  @param {Color}   [additiveColor=(0,0,0,0)]  - Additive color to be applied
+ *  @param {Boolean} [useWebGL=glEnable]        - Use accelerated WebGL rendering
+ *  @param {Boolean} [screenSpace=false]        - If true the pos and size are in screen space
+ *  @param {CanvasRenderingContext2D} [context] - Canvas 2D context to draw to
  *  @memberof Draw */
 function drawTile(pos, size=vec2(1), tileInfo, color=new Color,
     angle=0, mirror, additiveColor=new Color(0,0,0,0), useWebGL=glEnable, screenSpace, context)
 {
-    ASSERT(!context || !useWebGL); // context only supported in canvas 2D mode
-    ASSERT(typeof tileInfo !== 'number' || !tileInfo); // prevent old style calls
-    // to fix old calls, replace with tile(tileIndex, tileSize)
+    ASSERT(!context || !useWebGL, 'context only supported in canvas 2D mode'); 
+    ASSERT(typeof tileInfo !== 'number' || !tileInfo, 
+        'this is an old style calls, to fix replace it with tile(tileIndex, tileSize)');
 
-    showWatermark && ++drawCount;
     const textureInfo = tileInfo && tileInfo.getTextureInfo();
     if (useWebGL)
     {
@@ -2123,6 +1923,7 @@ function drawTile(pos, size=vec2(1), tileInfo, color=new Color,
     else
     {
         // normal canvas 2D rendering method (slower)
+        showWatermark && ++drawCount;
         drawCanvas2D(pos, size, angle, mirror, (context)=>
         {
             if (textureInfo)
@@ -2148,51 +1949,25 @@ function drawTile(pos, size=vec2(1), tileInfo, color=new Color,
 
 /** Draw colored rect centered on pos
  *  @param {Vector2} pos
- *  @param {Vector2} [size=Vector2(1,1)]
- *  @param {Color}   [color=Color()]
- *  @param {Number}  [angle=0]
+ *  @param {Vector2} [size=(1,1)]
+ *  @param {Color}   [color=(1,1,1,1)]
+ *  @param {Number}  [angle]
  *  @param {Boolean} [useWebGL=glEnable]
- *  @param {Boolean} [screenSpace=0]
+ *  @param {Boolean} [screenSpace=false]
  *  @param {CanvasRenderingContext2D} [context]
  *  @memberof Draw */
 function drawRect(pos, size, color, angle, useWebGL, screenSpace, context)
 { 
-    drawTile(pos, size, undefined, color, angle, 0, undefined, useWebGL, screenSpace, context); 
-}
-
-/** Draw colored polygon using passed in points
- *  @param {Array}   points - Array of Vector2 points
- *  @param {Color}   [color=Color()]
- *  @param {Boolean} [useWebGL=glEnable]
- *  @param {Boolean} [screenSpace=0]
- *  @param {CanvasRenderingContext2D} [context]
- *  @memberof Draw */
-function drawPoly(points, color=new Color, useWebGL=glEnable, screenSpace, context)
-{
-    ASSERT(!context || !useWebGL); // context only supported in canvas 2D mode
-
-    if (useWebGL)
-        glDrawPoints(screenSpace ? points.map(screenToWorld) : points, color.rgbaInt());
-    else
-    {
-        // draw using canvas
-        if (!context)
-            context = mainContext;
-        context.fillStyle = color;
-        context.beginPath();
-        for (const point of screenSpace ? points : points.map(worldToScreen))
-            context.lineTo(point.x, point.y);
-        context.fill();
-    }
+    drawTile(pos, size, undefined, color, angle, false, undefined, useWebGL, screenSpace, context); 
 }
 
 /** Draw colored line between two points
  *  @param {Vector2} posA
  *  @param {Vector2} posB
- *  @param {Number}  [thickness=.1]
- *  @param {Color}   [color=Color()]
+ *  @param {Number}  [thickness]
+ *  @param {Color}   [color=(1,1,1,1)]
  *  @param {Boolean} [useWebGL=glEnable]
- *  @param {Boolean} [screenSpace=0]
+ *  @param {Boolean} [screenSpace=false]
  *  @param {CanvasRenderingContext2D} [context]
  *  @memberof Draw */
 function drawLine(posA, posB, thickness=.1, color, useWebGL, screenSpace, context)
@@ -2208,7 +1983,7 @@ function drawLine(posA, posB, thickness=.1, color, useWebGL, screenSpace, contex
  *  @param {Number}   angle
  *  @param {Boolean}  mirror
  *  @param {Function} drawFunction
- *  @param {Boolean} [screenSpace=0]
+ *  @param {Boolean} [screenSpace=false]
  *  @param {CanvasRenderingContext2D} [context=mainContext]
  *  @memberof Draw */
 function drawCanvas2D(pos, size, angle, mirror, drawFunction, screenSpace, context=mainContext)
@@ -2228,13 +2003,13 @@ function drawCanvas2D(pos, size, angle, mirror, drawFunction, screenSpace, conte
 }
 
 /** Enable normal or additive blend mode
- *  @param {Boolean} [additive=0]
+ *  @param {Boolean} [additive]
  *  @param {Boolean} [useWebGL=glEnable]
  *  @param {CanvasRenderingContext2D} [context=mainContext]
  *  @memberof Draw */
 function setBlendMode(additive, useWebGL=glEnable, context)
 {
-    ASSERT(!context || !useWebGL); // context only supported in canvas 2D mode
+    ASSERT(!context || !useWebGL, 'context only supported in canvas 2D mode');
     if (useWebGL)
         glAdditive = additive;
     else
@@ -2249,11 +2024,11 @@ function setBlendMode(additive, useWebGL=glEnable, context)
  *  Automatically splits new lines into rows
  *  @param {String}  text
  *  @param {Vector2} pos
- *  @param {Number}  [size=1]
- *  @param {Color}   [color=Color()]
- *  @param {Number}  [lineWidth=0]
- *  @param {Color}   [lineColor=Color(0,0,0)]
- *  @param {String}  [textAlign='center']
+ *  @param {Number}  [size]
+ *  @param {Color}   [color=(1,1,1,1)]
+ *  @param {Number}  [lineWidth]
+ *  @param {Color}   [lineColor=(0,0,0,1)]
+ *  @param {CanvasTextAlign}  [textAlign='center']
  *  @param {String}  [font=fontDefault]
  *  @param {CanvasRenderingContext2D} [context=overlayContext]
  *  @memberof Draw */
@@ -2266,19 +2041,19 @@ function drawText(text, pos, size=1, color, lineWidth=0, lineColor, textAlign, f
  *  Automatically splits new lines into rows
  *  @param {String}  text
  *  @param {Vector2} pos
- *  @param {Number}  [size=1]
- *  @param {Color}   [color=Color()]
- *  @param {Number}  [lineWidth=0]
- *  @param {Color}   [lineColor=Color(0,0,0)]
- *  @param {String}  [textAlign='center']
+ *  @param {Number}  [size]
+ *  @param {Color}   [color=(1,1,1,1)]
+ *  @param {Number}  [lineWidth]
+ *  @param {Color}   [lineColor=(0,0,0,1)]
+ *  @param {CanvasTextAlign}  [textAlign]
  *  @param {String}  [font=fontDefault]
  *  @param {CanvasRenderingContext2D} [context=overlayContext]
  *  @memberof Draw */
 function drawTextScreen(text, pos, size=1, color=new Color, lineWidth=0, lineColor=new Color(0,0,0), textAlign='center', font=fontDefault, context=overlayContext)
 {
-    context.fillStyle = color;
+    context.fillStyle = color.toString();
     context.lineWidth = lineWidth;
-    context.strokeStyle = lineColor;
+    context.strokeStyle = lineColor.toString();
     context.textAlign = textAlign;
     context.font = size + 'px '+ font;
     context.textBaseline = 'middle';
@@ -2312,9 +2087,9 @@ let engineFontImage;
 class FontImage
 {
     /** Create an image font
-     *  @param {HTMLImageElement} [image] - Image for the font, if undefined default font is used
-     *  @param {Vector2} [tileSize=vec2(8)] - Size of the font source tiles
-     *  @param {Vector2} [paddingSize=vec2(0,1)] - How much extra space to add between characters
+     *  @param {HTMLImageElement} [image]    - Image for the font, if undefined default font is used
+     *  @param {Vector2} [tileSize=(8,8)]    - Size of the font source tiles
+     *  @param {Vector2} [paddingSize=(0,1)] - How much extra space to add between characters
      *  @param {CanvasRenderingContext2D} [context=overlayContext] - context to draw to
      */
     constructor(image, tileSize=vec2(8), paddingSize=vec2(0,1), context=overlayContext)
@@ -2343,7 +2118,7 @@ class FontImage
     /** Draw text in screen space using the image font
      *  @param {String}  text
      *  @param {Vector2} pos
-     *  @param {Number}  [scale=4]
+     *  @param {Number}  [scale]
      *  @param {Boolean} [center]
      */
     drawTextScreen(text, pos, scale=4, center)
@@ -2361,7 +2136,7 @@ class FontImage
             for(let j=line.length; j--;)
             {
                 // draw each character
-                let charCode = line[j].charCodeAt();
+                let charCode = line[j].charCodeAt(0);
                 if (charCode < 32 || charCode > 127)
                     charCode = 127; // unknown character
 
@@ -2385,7 +2160,7 @@ class FontImage
 /** Returns true if fullscreen mode is active
  *  @return {Boolean}
  *  @memberof Draw */
-function isFullscreen() { return document.fullscreenElement; }
+function isFullscreen() { return !!document.fullscreenElement; }
 
 /** Toggle fullsceen mode
  *  @memberof Draw */
@@ -2411,28 +2186,37 @@ function toggleFullscreen()
 
 
 /** Returns true if device key is down
- *  @param {Number} key
- *  @param {Number} [device=0]
+ *  @param {String|Number} key
+ *  @param {Number} [device]
  *  @return {Boolean}
  *  @memberof Input */
 function keyIsDown(key, device=0)
-{ return inputData[device] && inputData[device][key] & 1; }
+{ 
+    ASSERT(device > 0 || typeof key !== 'number' || key < 3, 'use code string for keyboard');
+    return inputData[device] && !!(inputData[device][key] & 1); 
+}
 
 /** Returns true if device key was pressed this frame
- *  @param {Number} key
- *  @param {Number} [device=0]
+ *  @param {String|Number} key
+ *  @param {Number} [device]
  *  @return {Boolean}
  *  @memberof Input */
 function keyWasPressed(key, device=0)
-{ return inputData[device] && inputData[device][key] & 2 ? 1 : 0; }
+{ 
+    ASSERT(device > 0 || typeof key !== 'number' || key < 3, 'use code string for keyboard');
+    return inputData[device] && !!(inputData[device][key] & 2); 
+}
 
 /** Returns true if device key was released this frame
- *  @param {Number} key
- *  @param {Number} [device=0]
+ *  @param {String|Number} key
+ *  @param {Number} [device]
  *  @return {Boolean}
  *  @memberof Input */
 function keyWasReleased(key, device=0)
-{ return inputData[device] && inputData[device][key] & 4 ? 1 : 0; }
+{ 
+    ASSERT(device > 0 || typeof key !== 'number' || key < 3, 'use code string for keyboard');
+    return inputData[device] && !!(inputData[device][key] & 4);
+}
 
 /** Clears all input
  *  @memberof Input */
@@ -2477,16 +2261,16 @@ let mouseWheel = 0;
 /** Returns true if user is using gamepad (has more recently pressed a gamepad button)
  *  @type {Boolean}
  *  @memberof Input */
-let isUsingGamepad = 0;
+let isUsingGamepad = false;
 
 /** Prevents input continuing to the default browser handling (false by default)
  *  @type {Boolean}
  *  @memberof Input */
-let preventDefaultInput = 0;
+let preventDefaultInput = false;
 
 /** Returns true if gamepad button is down
  *  @param {Number} button
- *  @param {Number} [gamepad=0]
+ *  @param {Number} [gamepad]
  *  @return {Boolean}
  *  @memberof Input */
 function gamepadIsDown(button, gamepad=0)
@@ -2494,7 +2278,7 @@ function gamepadIsDown(button, gamepad=0)
 
 /** Returns true if gamepad button was pressed
  *  @param {Number} button
- *  @param {Number} [gamepad=0]
+ *  @param {Number} [gamepad]
  *  @return {Boolean}
  *  @memberof Input */
 function gamepadWasPressed(button, gamepad=0)
@@ -2502,7 +2286,7 @@ function gamepadWasPressed(button, gamepad=0)
 
 /** Returns true if gamepad button was released
  *  @param {Number} button
- *  @param {Number} [gamepad=0]
+ *  @param {Number} [gamepad]
  *  @return {Boolean}
  *  @memberof Input */
 function gamepadWasReleased(button, gamepad=0)
@@ -2510,7 +2294,7 @@ function gamepadWasReleased(button, gamepad=0)
 
 /** Returns gamepad stick value
  *  @param {Number} stick
- *  @param {Number} [gamepad=0]
+ *  @param {Number} [gamepad]
  *  @return {Vector2}
  *  @memberof Input */
 function gamepadStick(stick,  gamepad=0)
@@ -2553,9 +2337,10 @@ function inputUpdatePost()
         if (debug && e.target != document.body) return;
         if (!e.repeat)
         {
-            inputData[isUsingGamepad = 0][e.which] = 3;
+            isUsingGamepad = false;
+            inputData[0][e.code] = 3;
             if (inputWASDEmulateDirection)
-                inputData[0][remapKey(e.which)] = 3;
+                inputData[0][remapKey(e.code)] = 3;
         }
         preventDefaultInput && e.preventDefault();
     }
@@ -2563,26 +2348,29 @@ function inputUpdatePost()
     onkeyup = (e)=>
     {
         if (debug && e.target != document.body) return;
-        inputData[0][e.which] = 4;
+        inputData[0][e.code] = 4;
         if (inputWASDEmulateDirection)
-            inputData[0][remapKey(e.which)] = 4;
+            inputData[0][remapKey(e.code)] = 4;
     }
 
     // handle remapping wasd keys to directions
     function remapKey(c)
-    { 
+    {
         return inputWASDEmulateDirection ? 
-            c==87?38 : c==83?40 : c==65?37 : c==68?39 : c : c; 
+            c == 'KeyW' ? 'ArrowUp' : 
+            c == 'KeyS' ? 'ArrowDown' : 
+            c == 'KeyA' ? 'ArrowLeft' : 
+            c == 'KeyD' ? 'ArrowRight' : c : c;
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Mouse event handlers
 
-onmousedown = (e)=> {inputData[isUsingGamepad = 0][e.button] = 3; onmousemove(e); e.button && e.preventDefault();}
+onmousedown = (e)=> {isUsingGamepad = false; inputData[0][e.button] = 3; mousePosScreen = mouseToScreen(e); e.button && e.preventDefault();}
 onmouseup   = (e)=> inputData[0][e.button] = inputData[0][e.button] & 2 | 4;
 onmousemove = (e)=> mousePosScreen = mouseToScreen(e);
-onwheel = (e)=> e.ctrlKey || (mouseWheel = sign(e.deltaY));
+onwheel     = (e)=> mouseWheel = e.ctrlKey ? 0 : sign(e.deltaY);
 oncontextmenu = (e)=> false; // prevent right click menu
 
 // convert a mouse or touch event position to screen space
@@ -2599,9 +2387,21 @@ function mouseToScreen(mousePos)
 ///////////////////////////////////////////////////////////////////////////////
 // Gamepad input
 
+// gamepad internal variables
 const stickData = [];
+
+// gamepads are updated by engine every frame automatically
 function gamepadsUpdate()
 {
+    const applyDeadZones = (v)=>
+    {
+        const min=.3, max=.8;
+        const deadZone = (v)=> 
+            v >  min ?  percent( v, min, max) : 
+            v < -min ? -percent(-v, min, max) : 0;
+        return vec2(deadZone(v.x), deadZone(-v.y)).clampLength();
+    }
+
     // update touch gamepad if enabled
     if (touchGamepadEnable && isTouchDevice)
     {
@@ -2613,19 +2413,33 @@ function gamepadsUpdate()
         {
             // read virtual analog stick
             const sticks = stickData[0] || (stickData[0] = []);
-            sticks[0] = vec2(touchGamepadStick.x, -touchGamepadStick.y); // flip vertical
+            sticks[0] = vec2();
+            if (touchGamepadAnalog)
+                sticks[0] = applyDeadZones(touchGamepadStick);
+            else if (touchGamepadStick.lengthSquared() > .3)
+            {
+                // convert to 8 way dpad
+                sticks[0].x = Math.round(touchGamepadStick.x);
+                sticks[0].y = -Math.round(touchGamepadStick.y);
+                sticks[0] = sticks[0].clampLength();
+            }
 
             // read virtual gamepad buttons
             const data = inputData[1] || (inputData[1] = []);
             for (let i=10; i--;)
             {
                 const j = i == 3 ? 2 : i == 2 ? 3 : i; // fix button locations
-                data[j] = touchGamepadButtons[i] ? 1 + 2*!gamepadIsDown(j,0) : 4*gamepadIsDown(j,0);
+                data[j] = touchGamepadButtons[i] ? gamepadIsDown(j,0) ? 1 : 3 : gamepadIsDown(j,0) ? 4 : 0;
             }
         }
     }
 
-    if (!gamepadsEnable || !navigator || !navigator.getGamepads || !document.hasFocus() && !debug)
+    // return if gamepads are disabled or not supported
+    if (!gamepadsEnable || !navigator || !navigator.getGamepads)
+        return;
+
+    // only poll gamepads when focused or in debug mode
+    if (!debug && !document.hasFocus())
         return;
 
     // poll gamepads
@@ -2639,31 +2453,31 @@ function gamepadsUpdate()
 
         if (gamepad)
         {
-            // read clamp dead zone of analog sticks
-            const deadZone = .3, deadZoneMax = .8, applyDeadZone = (v)=> 
-                v >  deadZone ?  percent( v, deadZone, deadZoneMax) : 
-                v < -deadZone ? -percent(-v, deadZone, deadZoneMax) : 0;
-
             // read analog sticks
             for (let j = 0; j < gamepad.axes.length-1; j+=2)
-                sticks[j>>1] = vec2(applyDeadZone(gamepad.axes[j]), applyDeadZone(-gamepad.axes[j+1])).clampLength();
+                sticks[j>>1] = applyDeadZones(vec2(gamepad.axes[j],gamepad.axes[j+1]));
             
             // read buttons
             for (let j = gamepad.buttons.length; j--;)
             {
                 const button = gamepad.buttons[j];
-                data[j] = button.pressed ? 1 + 2*!gamepadIsDown(j,i) : 4*gamepadIsDown(j,i);
-                isUsingGamepad |= !i && button.pressed;
-                touchGamepadEnable && touchGamepadTimer.unset(); // disable touch gamepad if using real gamepad
+                const wasDown = gamepadIsDown(j,i);
+                data[j] = button.pressed ? wasDown ? 1 : 3 : wasDown ? 4 : 0;
+                isUsingGamepad ||= !i && button.pressed;
             }
 
             if (gamepadDirectionEmulateStick)
             {
                 // copy dpad to left analog stick when pressed
-                const dpad = vec2(gamepadIsDown(15,i) - gamepadIsDown(14,i), gamepadIsDown(12,i) - gamepadIsDown(13,i));
+                const dpad = vec2(
+                    (gamepadIsDown(15,i)&&1) - (gamepadIsDown(14,i)&&1), 
+                    (gamepadIsDown(12,i)&&1) - (gamepadIsDown(13,i)&&1));
                 if (dpad.lengthSquared())
                     sticks[0] = dpad.clampLength();
             }
+
+            // disable touch gamepad if using real gamepad
+            touchGamepadEnable && isUsingGamepad && touchGamepadTimer.unset(); 
         }
     }
 }
@@ -2671,9 +2485,9 @@ function gamepadsUpdate()
 ///////////////////////////////////////////////////////////////////////////////
 
 /** Pulse the vibration hardware if it exists
- *  @param {Number} [pattern=100] - a single value in miliseconds or vibration interval array
+ *  @param {Number|Array} [pattern] - single value in ms or vibration interval array
  *  @memberof Input */
-function vibrate(pattern)
+function vibrate(pattern=100)
 { vibrateEnable && navigator && navigator.vibrate && navigator.vibrate(pattern); }
 
 /** Cancel any ongoing vibration
@@ -2691,29 +2505,28 @@ const isTouchDevice = window.ontouchstart !== undefined;
 if (isTouchDevice)
 {
     // override mouse events
-    let wasTouching, mouseDown = onmousedown, mouseUp = onmouseup;
+    let wasTouching;
     onmousedown = onmouseup = ()=> 0;
 
     // handle all touch events the same way
     ontouchstart = ontouchmove = ontouchend = (e)=>
     {
-        e.button = 0; // all touches are left click
-
-        // fix stalled audio on mobile
-        if (soundEnable)
-            audioContext ? audioContext.resume() : zzfx(0);
+        // fix stalled audio requiring user interaction
+        if (soundEnable && audioContext && audioContext.state != 'running')
+            zzfx(0);
 
         // check if touching and pass to mouse events
         const touching = e.touches.length;
+        const button = 0; // all touches are left mouse button
         if (touching)
         {
             // set event pos and pass it along
-            e.x = e.touches[0].clientX;
-            e.y = e.touches[0].clientY;
-            wasTouching ? onmousemove(e) : mouseDown(e);
+            const p = vec2(e.touches[0].clientX, e.touches[0].clientY);
+            mousePosScreen = mouseToScreen(p);
+            wasTouching ? isUsingGamepad = false : inputData[0][button] = 3;
         }
         else if (wasTouching)
-            mouseUp(e);
+            inputData[0][button] = inputData[0][button] & 2 | 4;
 
         // set was touching
         wasTouching = touching;
@@ -2741,7 +2554,7 @@ function createTouchGamepad()
     touchGamepadStick = vec2();
 
     const touchHandler = ontouchstart;
-    ontouchstart = ontouchmove = ontouchend = (e)=> 
+    ontouchstart = ontouchmove = ontouchend = (e)=>
     {
         // clear touch gamepad input
         touchGamepadStick = vec2();
@@ -2771,14 +2584,7 @@ function createTouchGamepad()
             if (touchPos.distance(stickCenter) < touchGamepadSize)
             {
                 // virtual analog stick
-                if (touchGamepadAnalog)
-                    touchGamepadStick = touchPos.subtract(stickCenter).scale(2/touchGamepadSize).clampLength();
-                else
-                {
-                    // 8 way dpad
-                    const angle = touchPos.subtract(stickCenter).angle();
-                    touchGamepadStick.setAngle((angle * 4 / PI + 8.5 | 0) * PI / 4);
-                }
+                touchGamepadStick = touchPos.subtract(stickCenter).scale(2/touchGamepadSize).clampLength();
             }
             else if (touchPos.distance(buttonCenter) < touchGamepadSize)
             {
@@ -2794,8 +2600,8 @@ function createTouchGamepad()
         }
 
         // call default touch handler and set to using gamepad
-        touchHandler(e);
-        isUsingGamepad = 1;
+        touchHandler.bind(window)(e);
+        isUsingGamepad = true;
         
         // must return true so the document will get focus
         return true;
@@ -2809,7 +2615,7 @@ function touchGamepadRender()
         return;
     
     // fade off when not touching or paused
-    const alpha = percent(touchGamepadTimer, 4, 3);
+    const alpha = percent(touchGamepadTimer.get(), 4, 3);
     if (!alpha || paused)
         return;
 
@@ -2846,7 +2652,7 @@ function touchGamepadRender()
     const rightCenter = vec2(mainCanvasSize.x-touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
     for (let i=4; i--;)
     {
-        const pos = rightCenter.add(vec2().setAngle(i*PI/2, touchGamepadSize/2));
+        const pos = rightCenter.add(vec2().setDirection(i, touchGamepadSize/2));
         overlayContext.fillStyle = touchGamepadButtons[i] ? '#fff' : '#000';
         overlayContext.beginPath();
         overlayContext.arc(pos.x, pos.y, touchGamepadSize/4, 0,9);
@@ -2871,7 +2677,7 @@ function touchGamepadRender()
 
 
 /** 
- * Sound Object - Stores a zzfx sound for later use and can be played positionally
+ * Sound Object - Stores a sound for later use and can be played positionally
  * 
  * <a href=https://killedbyapixel.github.io/ZzFX/>Create sounds using the ZzFX Sound Designer.</a>
  * @example
@@ -2886,7 +2692,7 @@ class Sound
     /** Create a sound object and cache the zzfx samples for later use
      *  @param {Array}  zzfxSound - Array of zzfx parameters, ex. [.5,.5]
      *  @param {Number} [range=soundDefaultRange] - World space max range of sound, will not play if camera is farther away
-     *  @param {Number} [taper=soundDefaultTaper] - At what percentage of range should it start tapering off
+     *  @param {Number} [taper=soundDefaultTaper] - At what percentage of range should it start tapering
      */
     constructor(zzfxSound, range=soundDefaultRange, taper=soundDefaultTaper)
     {
@@ -2913,13 +2719,13 @@ class Sound
 
     /** Play the sound
      *  @param {Vector2} [pos] - World space position to play the sound, sound is not attenuated if null
-     *  @param {Number}  [volume=1] - How much to scale volume by (in addition to range fade)
-     *  @param {Number}  [pitch=1] - How much to scale pitch by (also adjusted by this.randomness)
-     *  @param {Number}  [randomnessScale=1] - How much to scale randomness
-     *  @param {Boolean} [loop=0] - Should the sound loop
+     *  @param {Number}  [volume] - How much to scale volume by (in addition to range fade)
+     *  @param {Number}  [pitch] - How much to scale pitch by (also adjusted by this.randomness)
+     *  @param {Number}  [randomnessScale] - How much to scale randomness
+     *  @param {Boolean} [loop] - Should the sound loop
      *  @return {AudioBufferSourceNode} - The audio source node
      */
-    play(pos, volume=1, pitch=1, randomnessScale=1, loop=0)
+    play(pos, volume=1, pitch=1, randomnessScale=1, loop=false)
     {
         if (!soundEnable || !this.sampleChannels) return;
 
@@ -2952,8 +2758,13 @@ class Sound
     {
         if (this.source)
             this.source.stop();
-        this.source = 0;
+        this.source = undefined;
     }
+    
+    /** Get source of most recent instance of this sound that was played
+     *  @return {AudioBufferSourceNode}
+     */
+    getSource() { return this.source; }
 
     /** Play the sound as a note with a semitone offset
      *  @param {Number}  semitoneOffset - How many semitones to offset pitch
@@ -2969,12 +2780,7 @@ class Sound
      */
     getDuration() 
     { return this.sampleChannels && this.sampleChannels[0].length / this.sampleRate; }
-
-    /** Check if the last instance of this sound is playing
-     *  @return {Boolean} - True if the sound is playing
-     */
-    isPlaying() { return this.source && !this.source.ended; }
-
+    
     /** Check if sound is loading, for sounds fetched from a url
      *  @return {Boolean} - True if sound is loading and not ready to play
      */
@@ -2995,32 +2801,29 @@ class SoundWave extends Sound
 {
     /** Create a sound object and cache the wave file for later use
      *  @param {String} filename - Filename of audio file to load
-     *  @param {Number} [randomness=0] - How much to randomize frequency each time sound plays
+     *  @param {Number} [randomness] - How much to randomize frequency each time sound plays
      *  @param {Number} [range=soundDefaultRange] - World space max range of sound, will not play if camera is farther away
      *  @param {Number} [taper=soundDefaultTaper] - At what percentage of range should it start tapering off
      */
     constructor(filename, randomness=0, range, taper)
     {
-        super(0, range, taper);
+        super(undefined, range, taper);
         this.randomness = randomness;
 
         if (!soundEnable) return;
-        if (!soundDecoderContext)
-            soundDecoderContext = new AudioContext;
 
         fetch(filename)
         .then(response => response.arrayBuffer())
-        .then(arrayBuffer => soundDecoderContext.decodeAudioData(arrayBuffer))
+        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
         .then(audioBuffer => 
         {
             this.sampleChannels = [];
             for (let i = audioBuffer.numberOfChannels; i--;)
-                this.sampleChannels[i] = audioBuffer.getChannelData(i);
+                this.sampleChannels[i] = Array.from(audioBuffer.getChannelData(i));
             this.sampleRate = audioBuffer.sampleRate;
         });
     }
 }
-let soundDecoderContext; // audio context used only to decode audio files
 
 /**
  * Music Object - Stores a zzfx music track for later use
@@ -3040,7 +2843,7 @@ let soundDecoderContext; // audio context used only to decode audio files
  *                 1, 0, 9, 1    // channel notes
  *             ], 
  *             [                 // channel 1
- *                 0, 1,         // instrument 1, right speaker
+ *                 0, 1,         // instrument 0, right speaker
  *                 0, 12, 17, -1 // channel notes
  *             ]
  *         ],
@@ -3055,11 +2858,11 @@ let soundDecoderContext; // audio context used only to decode audio files
 class Music extends Sound
 {
     /** Create a music object and cache the zzfx music samples for later use
-     *  @param {Array} zzfxMusic - Array of zzfx music parameters
+     *  @param {[Array, Array, Array, Number]} zzfxMusic - Array of zzfx music parameters
      */
     constructor(zzfxMusic)
     {
-        super();
+        super(undefined);
 
         if (!soundEnable) return;
         this.randomness = 0;
@@ -3069,24 +2872,24 @@ class Music extends Sound
 
     /** Play the music
      *  @param {Number}  [volume=1] - How much to scale volume by
-     *  @param {Boolean} [loop=1] - True if the music should loop
+     *  @param {Boolean} [loop] - True if the music should loop
      *  @return {AudioBufferSourceNode} - The audio source node
      */
-    playMusic(volume, loop = 1)
-    { return super.play(0, volume, 1, 1, loop); }
+    playMusic(volume, loop=false)
+    { return super.play(undefined, volume, 1, 1, loop); }
 }
 
 /** Play an mp3, ogg, or wav audio from a local file or url
- *  @param {String}  url - Location of sound file to play
- *  @param {Number}  [volume=1] - How much to scale volume by
- *  @param {Boolean} [loop=1] - True if the music should loop
+ *  @param {String}  filename - Location of sound file to play
+ *  @param {Number}  [volume] - How much to scale volume by
+ *  @param {Boolean} [loop] - True if the music should loop
  *  @return {HTMLAudioElement} - The audio element for this sound
  *  @memberof Audio */
-function playAudioFile(url, volume=1, loop=1)
+function playAudioFile(filename, volume=1, loop=false)
 {
     if (!soundEnable) return;
 
-    const audio = new Audio(url);
+    const audio = new Audio(filename);
     audio.volume = soundVolume * volume;
     audio.loop = loop;
     audio.play();
@@ -3096,9 +2899,9 @@ function playAudioFile(url, volume=1, loop=1)
 /** Speak text with passed in settings
  *  @param {String} text - The text to speak
  *  @param {String} [language] - The language/accent to use (examples: en, it, ru, ja, zh)
- *  @param {Number} [volume=1] - How much to scale volume by
- *  @param {Number} [rate=1] - How quickly to speak
- *  @param {Number} [pitch=1] - How much to change the pitch by
+ *  @param {Number} [volume] - How much to scale volume by
+ *  @param {Number} [rate] - How quickly to speak
+ *  @param {Number} [pitch] - How much to change the pitch by
  *  @return {SpeechSynthesisUtterance} - The utterance that was spoken
  *  @memberof Audio */
 function speak(text, language='', volume=1, rate=1, pitch=1)
@@ -3125,7 +2928,7 @@ function speakStop() {speechSynthesis && speechSynthesis.cancel();}
 
 /** Get frequency of a note on a musical scale
  *  @param {Number} semitoneOffset - How many semitones away from the root note
- *  @param {Number} [rootNoteFrequency=220] - Frequency at semitone offset 0
+ *  @param {Number} [rootFrequency=220] - Frequency at semitone offset 0
  *  @return {Number} - The frequency of the note
  *  @memberof Audio */
 function getNoteFrequency(semitoneOffset, rootFrequency=220)
@@ -3134,32 +2937,38 @@ function getNoteFrequency(semitoneOffset, rootFrequency=220)
 ///////////////////////////////////////////////////////////////////////////////
 
 /** Audio context used by the engine
+ *  @type {AudioContext}
  *  @memberof Audio */
-let audioContext;
+let audioContext = new AudioContext;
+
+/** Keep track if audio was suspended when last sound was played
+ *  @type {Boolean}
+ *  @memberof Audio */
+let audioSuspended = false;
 
 /** Play cached audio samples with given settings
  *  @param {Array}   sampleChannels - Array of arrays of samples to play (for stereo playback)
- *  @param {Number}  [volume=1] - How much to scale volume by
- *  @param {Number}  [rate=1] - The playback rate to use
- *  @param {Number}  [pan=0] - How much to apply stereo panning
- *  @param {Boolean} [loop=0] - True if the sound should loop when it reaches the end
+ *  @param {Number}  [volume] - How much to scale volume by
+ *  @param {Number}  [rate] - The playback rate to use
+ *  @param {Number}  [pan] - How much to apply stereo panning
+ *  @param {Boolean} [loop] - True if the sound should loop when it reaches the end
  *  @param {Number}  [sampleRate=44100] - Sample rate for the sound
  *  @return {AudioBufferSourceNode} - The audio node of the sound played
  *  @memberof Audio */
-function playSamples(sampleChannels, volume=1, rate=1, pan=0, loop=0, sampleRate=zzfxR) 
+function playSamples(sampleChannels, volume=1, rate=1, pan=0, loop=false, sampleRate=zzfxR) 
 {
     if (!soundEnable) return;
 
-    // create audio context if needed
-    if (!audioContext)
-        audioContext = new AudioContext;
-
     // prevent sounds from building up if they can't be played
-    if (audioContext.state != 'running')
+    const audioWasSuspended = audioSuspended;
+    if (audioSuspended = audioContext.state != 'running')
     {
         // fix stalled audio
         audioContext.resume();
-        return;
+
+        // prevent suspended sounds from building up
+        if (audioWasSuspended)
+            return;
     }
 
     // create buffer and source
@@ -3186,7 +2995,7 @@ function playSamples(sampleChannels, volume=1, rate=1, pan=0, loop=0, sampleRate
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ZzFXMicro - Zuper Zmall Zound Zynth - v1.2.0 by Frank Force
+// ZzFXMicro - Zuper Zmall Zound Zynth - v1.3.1 by Frank Force
 
 /** Generate and play a ZzFX sound
  *  
@@ -3202,26 +3011,27 @@ function zzfx(...zzfxSound) { return playSamples([zzfxG(...zzfxSound)]); }
 const zzfxR = 44100; 
 
 /** Generate samples for a ZzFX sound
- *  @param {Number}  [volume=1] - Volume scale (percent)
- *  @param {Number}  [randomness=.05] - How much to randomize frequency (percent Hz)
- *  @param {Number}  [frequency=220] - Frequency of sound (Hz)
- *  @param {Number}  [attack=0] - Attack time, how fast sound starts (seconds)
- *  @param {Number}  [sustain=0] - Sustain time, how long sound holds (seconds)
- *  @param {Number}  [release=.1] - Release time, how fast sound fades out (seconds)
- *  @param {Number}  [shape=0] - Shape of the sound wave
- *  @param {Number}  [shapeCurve=1] - Squarenes of wave (0=square, 1=normal, 2=pointy)
- *  @param {Number}  [slide=0] - How much to slide frequency (kHz/s)
- *  @param {Number}  [deltaSlide=0] - How much to change slide (kHz/s/s)
- *  @param {Number}  [pitchJump=0] - Frequency of pitch jump (Hz)
- *  @param {Number}  [pitchJumpTime=0] - Time of pitch jump (seconds)
- *  @param {Number}  [repeatTime=0] - Resets some parameters periodically (seconds)
- *  @param {Number}  [noise=0] - How much random noise to add (percent)
- *  @param {Number}  [modulation=0] - Frequency of modulation wave, negative flips phase (Hz)
- *  @param {Number}  [bitCrush=0] - Resamples at a lower frequency in (samples*100)
- *  @param {Number}  [delay=0] - Overlap sound with itself for reverb and flanger effects (seconds)
- *  @param {Number}  [sustainVolume=1] - Volume level for sustain (percent)
- *  @param {Number}  [decay=0] - Decay time, how long to reach sustain after attack (seconds)
- *  @param {Number}  [tremolo=0] - Trembling effect, rate controlled by repeat time (precent)
+ *  @param {Number}  [volume] - Volume scale (percent)
+ *  @param {Number}  [randomness] - How much to randomize frequency (percent Hz)
+ *  @param {Number}  [frequency] - Frequency of sound (Hz)
+ *  @param {Number}  [attack] - Attack time, how fast sound starts (seconds)
+ *  @param {Number}  [sustain] - Sustain time, how long sound holds (seconds)
+ *  @param {Number}  [release] - Release time, how fast sound fades out (seconds)
+ *  @param {Number}  [shape] - Shape of the sound wave
+ *  @param {Number}  [shapeCurve] - Squarenes of wave (0=square, 1=normal, 2=pointy)
+ *  @param {Number}  [slide] - How much to slide frequency (kHz/s)
+ *  @param {Number}  [deltaSlide] - How much to change slide (kHz/s/s)
+ *  @param {Number}  [pitchJump] - Frequency of pitch jump (Hz)
+ *  @param {Number}  [pitchJumpTime] - Time of pitch jump (seconds)
+ *  @param {Number}  [repeatTime] - Resets some parameters periodically (seconds)
+ *  @param {Number}  [noise] - How much random noise to add (percent)
+ *  @param {Number}  [modulation] - Frequency of modulation wave, negative flips phase (Hz)
+ *  @param {Number}  [bitCrush] - Resamples at a lower frequency in (samples*100)
+ *  @param {Number}  [delay] - Overlap sound with itself for reverb and flanger effects (seconds)
+ *  @param {Number}  [sustainVolume] - Volume level for sustain (percent)
+ *  @param {Number}  [decay] - Decay time, how long to reach sustain after attack (seconds)
+ *  @param {Number}  [tremolo] - Trembling effect, rate controlled by repeat time (precent)
+ *  @param {Number}  [filter] - Filter cutoff frequency, positive for HPF, negative for LPF (Hz)
  *  @return {Array} - Array of audio samples
  *  @memberof Audio
  */
@@ -3231,78 +3041,91 @@ function zzfxG
     volume = 1, randomness = .05, frequency = 220, attack = 0, sustain = 0,
     release = .1, shape = 0, shapeCurve = 1, slide = 0, deltaSlide = 0,
     pitchJump = 0, pitchJumpTime = 0, repeatTime = 0, noise = 0, modulation = 0,
-    bitCrush = 0, delay = 0, sustainVolume = 1, decay = 0, tremolo = 0
+    bitCrush = 0, delay = 0, sustainVolume = 1, decay = 0, tremolo = 0, filter = 0
 )
 {
-    // locals
-    let PI2 = PI*2, startSlide = slide *= 500 * PI2 / zzfxR / zzfxR, b=[],
-        startFrequency = frequency *= (1 + randomness*rand(-1,1)) * PI2 / zzfxR,
-        t=0, tm=0, i=0, j=1, r=0, c=0, s=0, f, length
+    // init parameters
+    let PI2 = PI*2, sampleRate = zzfxR,
+        startSlide = slide *= 500 * PI2 / sampleRate / sampleRate,
+        startFrequency = frequency *= 
+            rand(1 + randomness, 1-randomness) * PI2 / sampleRate,
+        b = [], t = 0, tm = 0, i = 0, j = 1, r = 0, c = 0, s = 0, f, length,
+
+        // biquad LP/HP filter
+        quality = 2, w = PI2 * abs(filter) * 2 / sampleRate,
+        cos = Math.cos(w), alpha = Math.sin(w) / 2 / quality,
+        a0 = 1 + alpha, a1 = -2*cos / a0, a2 = (1 - alpha) / a0,
+        b0 = (1 + sign(filter) * cos) / 2 / a0, 
+        b1 = -(sign(filter) + cos) / a0, b2 = b0,
+        x2 = 0, x1 = 0, y2 = 0, y1 = 0;
 
     // scale by sample rate
-    attack = attack * zzfxR + 9; // minimum attack to prevent pop
-    decay *= zzfxR;
-    sustain *= zzfxR;
-    release *= zzfxR;
-    delay *= zzfxR;
-    deltaSlide *= 500 * PI2 / zzfxR**3;
-    modulation *= PI2 / zzfxR;
-    pitchJump *= PI2 / zzfxR;
-    pitchJumpTime *= zzfxR;
-    repeatTime = repeatTime * zzfxR | 0;
+    attack = attack * sampleRate + 9; // minimum attack to prevent pop
+    decay *= sampleRate;
+    sustain *= sampleRate;
+    release *= sampleRate;
+    delay *= sampleRate;
+    deltaSlide *= 500 * PI2 / sampleRate**3;
+    modulation *= PI2 / sampleRate;
+    pitchJump *= PI2 / sampleRate;
+    pitchJumpTime *= sampleRate;
+    repeatTime = repeatTime * sampleRate | 0;
+    volume *= soundVolume;
 
     // generate waveform
-    for (length = attack + decay + sustain + release + delay | 0;
-        i < length; b[i++] = s)
+    for(length = attack + decay + sustain + release + delay | 0;
+        i < length; b[i++] = s * volume)               // sample
     {
-        if (!(++c%(bitCrush*100|0)))                      // bit crush
+        if (!(++c%(bitCrush*100|0)))                   // bit crush
         {
-            s = shape? shape>1? shape>2? shape>3?         // wave shape
-                Math.sin((t%PI2)**3) :                    // 4 noise
-                max(min(Math.tan(t),1),-1):               // 3 tan
-                1-(2*t/PI2%2+2)%2:                        // 2 saw
-                1-4*abs(Math.round(t/PI2)-t/PI2):         // 1 triangle
-                Math.sin(t);                              // 0 sin
-                
+            s = shape? shape>1? shape>2? shape>3?      // wave shape
+                Math.sin(t**3) :                       // 4 noise
+                clamp(Math.tan(t),1,-1):               // 3 tan
+                1-(2*t/PI2%2+2)%2:                     // 2 saw
+                1-4*abs(Math.round(t/PI2)-t/PI2):      // 1 triangle
+                Math.sin(t);                           // 0 sin
+
             s = (repeatTime ?
                     1 - tremolo + tremolo*Math.sin(PI2*i/repeatTime) // tremolo
                     : 1) *
-                sign(s)*(abs(s)**shapeCurve) *            // curve 0=square, 2=pointy
-                volume * soundVolume * (                  // envelope
-                i < attack ? i/attack :                   // attack
-                i < attack + decay ?                      // decay
-                1-((i-attack)/decay)*(1-sustainVolume) :  // decay falloff
-                i < attack  + decay + sustain ?           // sustain
-                sustainVolume :                           // sustain volume
-                i < length - delay ?                      // release
-                (length - i - delay)/release *            // release falloff
-                sustainVolume :                           // release volume
-                0);                                       // post release
- 
-            s = delay ? s/2 + (delay > i ? 0 :            // delay
-                (i<length-delay? 1 : (length-i)/delay) *  // release delay 
-                b[i-delay|0]/2) : s;                      // sample delay
+                sign(s)*(abs(s)**shapeCurve) *           // curve
+                (i < attack ? i/attack :                 // attack
+                i < attack + decay ?                     // decay
+                1-((i-attack)/decay)*(1-sustainVolume) : // decay falloff
+                i < attack  + decay + sustain ?          // sustain
+                sustainVolume :                          // sustain volume
+                i < length - delay ?                     // release
+                (length - i - delay)/release *           // release falloff
+                sustainVolume :                          // release volume
+                0);                                      // post release
+
+            s = delay ? s/2 + (delay > i ? 0 :           // delay
+                (i<length-delay? 1 : (length-i)/delay) * // release delay 
+                b[i-delay|0]/2/volume) : s;              // sample delay
+
+            if (filter)                                   // apply filter
+                s = y1 = b2*x2 + b1*(x2=x1) + b0*(x1=s) - a2*y2 - a1*(y2=y1);
         }
 
-        f = (frequency += slide += deltaSlide) *          // frequency
-            Math.cos(modulation*tm++);                    // modulation
-        t += f - f*noise*(1 - (Math.sin(i)+1)*1e9%2);     // noise
+        f = (frequency += slide += deltaSlide) *// frequency
+            Math.cos(modulation*tm++);          // modulation
+        t += f + f*noise*Math.sin(i**5);        // noise
 
-        if (j && ++j > pitchJumpTime)    // pitch jump
-        {
-            frequency += pitchJump;      // apply pitch jump
-            startFrequency += pitchJump; // also apply to start
-            j = 0;                       // reset pitch jump time
-        }
+        if (j && ++j > pitchJumpTime)           // pitch jump
+        { 
+            frequency += pitchJump;             // apply pitch jump
+            startFrequency += pitchJump;        // also apply to start
+            j = 0;                              // stop pitch jump time
+        } 
 
-        if (repeatTime && !(++r % repeatTime)) // repeat
-        {
-            frequency = startFrequency;  // reset frequency
-            slide = startSlide;          // reset slide
-            j ||= 1;                     // reset pitch jump time
+        if (repeatTime && !(++r % repeatTime))  // repeat
+        { 
+            frequency = startFrequency;         // reset frequency
+            slide = startSlide;                 // reset slide
+            j = j || 1;                         // reset pitch jump time
         }
     }
-    
+
     return b;
 }
 
@@ -3313,7 +3136,7 @@ function zzfxG
  *  @param {Array} instruments - Array of ZzFX sound paramaters
  *  @param {Array} patterns - Array of pattern data
  *  @param {Array} sequence - Array of pattern indexes
- *  @param {Number} [BPM=125] - Playback speed of the song in BPM
+ *  @param {Number} [BPM] - Playback speed of the song in BPM
  *  @return {Array} - Left and right channel sample data
  *  @memberof Audio */
 function zzfxM(instruments, patterns, sequence, BPM = 125) 
@@ -3352,10 +3175,10 @@ function zzfxM(instruments, patterns, sequence, BPM = 125)
       patternChannel = patterns[patternIndex][channelIndex] || [0, 0, 0];
 
       // check if there are more channels
-      hasMore ||= !!patterns[patternIndex][channelIndex];
+      hasMore |= patterns[patternIndex][channelIndex]&&1;
 
       // get next offset, use the length of first channel
-      nextSampleOffset = outSampleOffset + (patterns[patternIndex][0].length - 2 - !notFirstBeat) * beatLength;
+      nextSampleOffset = outSampleOffset + (patterns[patternIndex][0].length - 2 - (notFirstBeat?0:1)) * beatLength;
       // for each beat in pattern, plus one extra if end of sequence
       isSequenceEnd = sequenceIndex == sequence.length - 1;
       for (i = 2, k = outSampleOffset; i < patternChannel.length + isSequenceEnd; notFirstBeat = ++i) {
@@ -3371,7 +3194,7 @@ function zzfxM(instruments, patterns, sequence, BPM = 125)
         for (j = 0; j < beatLength && notFirstBeat;
 
             // fade off attenuation at end of beat if stopping note, prevents clicking
-            j++ > beatLength - 99 && stop ? attenuation += (attenuation < 1) / 99 : 0
+            j++ > beatLength - 99 && stop && attenuation < 1? attenuation += 1 / 99 : 0
         ) {
           // copy sample to stereo buffers with panning
           sample = (1 - attenuation) * sampleBuffer[sampleOffset++] / 2 || 0;
@@ -3413,7 +3236,7 @@ function zzfxM(instruments, patterns, sequence, BPM = 125)
 /** 
  * LittleJS Tile Layer System
  * - Caches arrays of tiles to off screen canvas for fast rendering
- * - Unlimted numbers of layers, allocates canvases as needed
+ * - Unlimited numbers of layers, allocates canvases as needed
  * - Interfaces with EngineObject for collision
  * - Collision layer is separate from visible layers
  * - It is recommended to have a visible layer that matches the collision
@@ -3447,7 +3270,7 @@ function initTileCollision(size)
 
 /** Set tile collision data
  *  @param {Vector2} pos
- *  @param {Number}  [data=0]
+ *  @param {Number}  [data]
  *  @memberof TileCollision */
 function setTileCollisionData(pos, data=0)
 {
@@ -3465,7 +3288,7 @@ function getTileCollisionData(pos)
 
 /** Check if collision with another object should occur
  *  @param {Vector2}      pos
- *  @param {Vector2}      [size=Vector2(1,1)]
+ *  @param {Vector2}      [size=(0,0)]
  *  @param {EngineObject} [object]
  *  @return {Boolean}
  *  @memberof TileCollision */
@@ -3480,11 +3303,11 @@ function tileCollisionTest(pos, size=vec2(), object)
     {
         const tileData = tileCollision[y*tileCollisionSize.x+x];
         if (tileData && (!object || object.collideWithTile(tileData, vec2(x, y))))
-            return 1;
+            return true;
     }
 }
 
-/** Return the center of tile if any that is hit (does not return the exact intersection)
+/** Return the center of first tile hit (does not return the exact intersection)
  *  @param {Vector2}      posStart
  *  @param {Vector2}      posEnd
  *  @param {EngineObject} [object]
@@ -3546,11 +3369,11 @@ function tileCollisionRaycast(posStart, posEnd, object)
 class TileLayerData
 {
     /** Create a tile layer data object, one for each tile in a TileLayer
-     *  @param {Number}  [tile]          - The tile to use, untextured if undefined
-     *  @param {Number}  [direction=0]   - Integer direction of tile, in 90 degree increments
-     *  @param {Boolean} [mirror=0]      - If the tile should be mirrored along the x axis
-     *  @param {Color}   [color=Color()] - Color of the tile */
-    constructor(tile, direction=0, mirror=0, color=new Color())
+     *  @param {Number}  [tile]      - The tile to use, untextured if undefined
+     *  @param {Number}  [direction] - Integer direction of tile, in 90 degree increments
+     *  @param {Boolean} [mirror]    - If the tile should be mirrored along the x axis
+     *  @param {Color}   [color]     - Color of the tile */
+    constructor(tile, direction=0, mirror=false, color=new Color)
     {
         /** @property {Number}  - The tile to use, untextured if undefined */
         this.tile      = tile;
@@ -3563,7 +3386,7 @@ class TileLayerData
     }
 
     /** Set this tile to clear, it will not be rendered */
-    clear() { this.tile = this.direction = this.mirror = 0; color = new Color; }
+    clear() { this.tile = this.direction = 0; this.mirror = false; this.color = new Color; }
 }
 
 /**
@@ -3580,25 +3403,25 @@ class TileLayerData
  */
 class TileLayer extends EngineObject
 {
-/** Create a tile layer object
-    *  @param {Vector2} [position=Vector2()]       - World space position
-    *  @param {Vector2} [size=tileCollisionSize]   - World space size
-    *  @param {TileInfo} [tileInfo]                - Tile info for layer
-    *  @param {Vector2} [scale=Vector2(1,1)]       - How much to scale this layer when rendered
-    *  @param {Number}  [renderOrder=0]            - Objects sorted by renderOrder before being rendered
+    /** Create a tile layer object
+    *  @param {Vector2}  [position=(0,0)]     - World space position
+    *  @param {Vector2}  [size=tileCollisionSize] - World space size
+    *  @param {TileInfo} [tileInfo]    - Tile info for layer
+    *  @param {Vector2}  [scale=(1,1)] - How much to scale this layer when rendered
+    *  @param {Number}   [renderOrder] - Objects are sorted by renderOrder
     */
-constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderOrder=0)
+    constructor(position, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderOrder=0)
     {
-        super(pos, size, tileInfo, 0, undefined, renderOrder);
+        super(position, size, tileInfo, 0, undefined, renderOrder);
 
-        /** @property {HTMLCanvasElement}        - The canvas used by this tile layer */
+        /** @property {HTMLCanvasElement} - The canvas used by this tile layer */
         this.canvas = document.createElement('canvas');
         /** @property {CanvasRenderingContext2D} - The 2D canvas context used by this tile layer */
         this.context = this.canvas.getContext('2d');
-        /** @property {Vector2}                  - How much to scale this layer when rendered */
+        /** @property {Vector2} - How much to scale this layer when rendered */
         this.scale = scale;
-        /** @property {Boolean} [isOverlay=0]    - If true this layer will render to overlay canvas and appear above all objects */
-        this.isOverlay;
+        /** @property {Boolean} - If true this layer will render to overlay canvas and appear above all objects */
+        this.isOverlay = false;
 
         // init tile data
         this.data = [];
@@ -3607,10 +3430,10 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
     }
     
     /** Set data at a given position in the array 
-     *  @param {Vector2}       position   - Local position in array
-     *  @param {TileLayerData} data       - Data to set
-     *  @param {Boolean}       [redraw=0] - Force the tile to redraw if true */
-    setData(layerPos, data, redraw)
+     *  @param {Vector2}       layerPos - Local position in array
+     *  @param {TileLayerData} data     - Data to set
+     *  @param {Boolean}       [redraw] - Force the tile to redraw if true */
+    setData(layerPos, data, redraw=false)
     {
         if (layerPos.arrayCheck(this.size))
         {
@@ -3631,7 +3454,7 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
     // Render the tile layer, called automatically by the engine
     render()
     {
-        ASSERT(mainContext != this.context); // must call redrawEnd() after drawing tiles
+        ASSERT(mainContext != this.context, 'must call redrawEnd() after drawing tiles');
 
         // flush and copy gl canvas because tile canvas does not use webgl
         glEnable && !glOverlay && !this.isOverlay && glCopyToContext(mainContext);
@@ -3646,74 +3469,83 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
     }
 
     /** Draw all the tile data to an offscreen canvas 
-     *  - This may be slow in some browsers
-    */
+     *  - This may be slow in some browsers but only needs to be done once */
     redraw()
     {
-        this.redrawStart(1);
-        this.drawAllTileData();
+        this.redrawStart(true);
+        for (let x = this.size.x; x--;)
+        for (let y = this.size.y; y--;)
+            this.drawTileData(vec2(x,y), false);
         this.redrawEnd();
     }
 
     /** Call to start the redraw process
-     *  @param {Boolean} [clear=0] - Should it clear the canvas before drawing */
-    redrawStart(clear = 0)
+     *  - This can be used to manually update small parts of the level
+     *  @param {Boolean} [clear] - Should it clear the canvas before drawing */
+    redrawStart(clear=false)
     {
         // save current render settings
+        /** @type {[HTMLCanvasElement, CanvasRenderingContext2D, Vector2, Vector2, number]} */
         this.savedRenderSettings = [mainCanvas, mainContext, mainCanvasSize, cameraPos, cameraScale];
 
-        // hack: use normal rendering system to render the tiles
+        // use webgl rendering system to render the tiles if enabled
+        // this works by temporally taking control of the rendering system
         mainCanvas = this.canvas;
         mainContext = this.context;
+        mainCanvasSize = this.size.multiply(this.tileInfo.size);
         cameraPos = this.size.scale(.5);
         cameraScale = this.tileInfo.size.x;
 
         if (clear)
         {
             // clear and set size
-            mainCanvas.width  = this.size.x * this.tileInfo.size.x;
-            mainCanvas.height = this.size.y * this.tileInfo.size.y;
+            mainCanvas.width  = mainCanvasSize.x;
+            mainCanvas.height = mainCanvasSize.y;
         }
 
-        // begin a new render for the tile canvas
-        enginePreRender();
+        // disable smoothing for pixel art
+        this.context.imageSmoothingEnabled = !canvasPixelated;
+
+        // setup gl rendering if enabled
+        glEnable && glPreRender();
     }
 
     /** Call to end the redraw process */
     redrawEnd()
     {
-        ASSERT(mainContext == this.context); // must call redrawStart() before drawing tiles
-        glEnable && glCopyToContext(mainContext, 1);
+        ASSERT(mainContext == this.context, 'must call redrawStart() before drawing tiles');
+        glEnable && glCopyToContext(mainContext, true);
         //debugSaveCanvas(this.canvas);
 
         // set stuff back to normal
         [mainCanvas, mainContext, mainCanvasSize, cameraPos, cameraScale] = this.savedRenderSettings;
     }
 
-    /** Draw the tile at a given position
-     *  @param {Vector2} layerPos */
-    drawTileData(layerPos)
+    /** Draw the tile at a given position in the tile grid
+     *  This can be used to clear out tiles when they are destroyed
+     *  Tiles can also be redrawn if isinde a redrawStart/End block
+     *  @param {Vector2} layerPos 
+     *  @param {Boolean} [clear] - should the old tile be cleared out
+     */
+    drawTileData(layerPos, clear=true)
     {
-        // first clear out where the tile was
-        const pos = layerPos.floor().add(this.pos).add(vec2(.5));
-        this.drawCanvas2D(pos, vec2(1), 0, 0, (context)=>context.clearRect(-.5, -.5, 1, 1));
+        // clear out where the tile was, for full opaque tiles this can be skipped
+        const s = this.tileInfo.size;
+        if (clear)
+        {
+            const pos = layerPos.multiply(s);
+            this.context.clearRect(pos.x, this.canvas.height-pos.y, s.x, -s.y);
+        }
 
         // draw the tile if not undefined
         const d = this.getData(layerPos);
         if (d.tile != undefined)
         {
-            ASSERT(mainContext == this.context); // must call redrawStart() before drawing tiles
-            const tileInfo = tile(d.tile, this.tileInfo.size, this.tileInfo.textureIndex);
+            const pos = this.pos.add(layerPos).add(vec2(.5));
+            ASSERT(mainContext == this.context, 'must call redrawStart() before drawing tiles');
+            const tileInfo = tile(d.tile, s, this.tileInfo.textureIndex);
             drawTile(pos, vec2(1), tileInfo, d.color, d.direction*PI/2, d.mirror);
         }
-    }
-
-    /** Draw all the tiles in this layer */
-    drawAllTileData()
-    {
-        for (let x = this.size.x; x--;)
-        for (let y = this.size.y; y--;)
-             this.drawTileData(vec2(x,y));
     }
 
     /** Draw directly to the 2D canvas in world space (bipass webgl)
@@ -3735,11 +3567,11 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
         context.restore();
     }
 
-    /** Draw a tile directly onto the layer canvas
+    /** Draw a tile directly onto the layer canvas in world space
      *  @param {Vector2}  pos
-     *  @param {Vector2}  [size=Vector2(1,1)]
+     *  @param {Vector2}  [size=(1,1)]
      *  @param {TileInfo} [tileInfo]
-     *  @param {Color}    [color=Color()]
+     *  @param {Color}    [color=(1,1,1,1)]
      *  @param {Number}   [angle=0]
      *  @param {Boolean}  [mirror=0] */
     drawTile(pos, size=vec2(1), tileInfo, color=new Color, angle, mirror)
@@ -3764,13 +3596,13 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
         });
     }
 
-    /** Draw a rectangle directly onto the layer canvas
+    /** Draw a rectangle directly onto the layer canvas in world space
      *  @param {Vector2} pos
-     *  @param {Vector2} [size=Vector2(1,1)]
-     *  @param {Color}   [color=Color()]
+     *  @param {Vector2} [size=(1,1)]
+     *  @param {Color}   [color=(1,1,1,1)]
      *  @param {Number}  [angle=0] */
     drawRect(pos, size, color, angle) 
-    { this.drawTile(pos, size, -1, 0, color, angle); }
+    { this.drawTile(pos, size, undefined, color, angle); }
 }
 /** 
  * LittleJS Particle System
@@ -3784,12 +3616,12 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
  * @example
  * // create a particle emitter
  * let pos = vec2(2,3);
- * let particleEmiter = new ParticleEmitter
+ * let particleEmitter = new ParticleEmitter
  * (
- *     pos, 0, 1, 0, 500, PI,  // pos, angle, emitSize, emitTime, emitRate, emiteCone
- *     tile(0, 16),            // tileInfo
- *     new Color(1,1,1),   new Color(0,0,0),   // colorStartA, colorStartB
- *     new Color(1,1,1,0), new Color(0,0,0,0), // colorEndA, colorEndB
+ *     pos, 0, 1, 0, 500, PI,      // pos, angle, emitSize, emitTime, emitRate, emiteCone
+ *     tile(0, 16),                // tileInfo
+ *     rgb(1,1,1),   rgb(0,0,0),   // colorStartA, colorStartB
+ *     rgb(1,1,1,0), rgb(0,0,0,0), // colorEndA, colorEndB
  *     2, .2, .2, .1, .05,  // particleTime, sizeStart, sizeEnd, particleSpeed, particleAngleSpeed
  *     .99, 1, 1, PI, .05,  // damping, angleDamping, gravityScale, particleCone, fadeRate, 
  *     .5, 1                // randomness, collide, additive, randomColorLinear, renderOrder
@@ -3798,37 +3630,37 @@ constructor(pos, size=tileCollisionSize, tileInfo=tile(), scale=vec2(1), renderO
 class ParticleEmitter extends EngineObject
 {
     /** Create a particle system with the given settings
-     *  @param {Vector2} position           - World space position of the emitter
-     *  @param {Number}  [angle=0]          - Angle to emit the particles
-     *  @param {Number}  [emitSize=0]       - World space size of the emitter (float for circle diameter, vec2 for rect)
-     *  @param {Number}  [emitTime=0]       - How long to stay alive (0 is forever)
-     *  @param {Number}  [emitRate=100]     - How many particles per second to spawn, does not emit if 0
-     *  @param {Number}  [emitConeAngle=PI] - Local angle to apply velocity to particles from emitter
-     *  @param {TileInfo} [tileInfo]         - Tile info to render particles (undefined is untextured)
-     *  @param {Color}   [colorStartA=Color()] - Color at start of life 1, randomized between start colors
-     *  @param {Color}   [colorStartB=Color()] - Color at start of life 2, randomized between start colors
-     *  @param {Color}   [colorEndA=Color(1,1,1,0)] - Color at end of life 1, randomized between end colors
-     *  @param {Color}   [colorEndB=Color(1,1,1,0)] - Color at end of life 2, randomized between end colors
-     *  @param {Number}  [particleTime=.5]      - How long particles live
-     *  @param {Number}  [sizeStart=.1]         - How big are particles at start
-     *  @param {Number}  [sizeEnd=1]            - How big are particles at end
-     *  @param {Number}  [speed=.1]             - How fast are particles when spawned
-     *  @param {Number}  [angleSpeed=.05]       - How fast are particles rotating
-     *  @param {Number}  [damping=1]            - How much to dampen particle speed
-     *  @param {Number}  [angleDamping=1]       - How much to dampen particle angular speed
-     *  @param {Number}  [gravityScale=0]       - How much does gravity effect particles
-     *  @param {Number}  [particleConeAngle=PI] - Cone for start particle angle
-     *  @param {Number}  [fadeRate=.1]          - How quick to fade in particles at start/end in percent of life
-     *  @param {Number}  [randomness=.2]        - Apply extra randomness percent
-     *  @param {Boolean} [collideTiles=0]       - Do particles collide against tiles
-     *  @param {Boolean} [additive=0]           - Should particles use addtive blend
-     *  @param {Boolean} [randomColorLinear=1]  - Should color be randomized linearly or across each component
-     *  @param {Number}  [renderOrder=0]        - Render order for particles (additive is above other stuff by default)
-     *  @param {Boolean}  [localSpace=0]        - Should it be in local space of emitter (world space is default)
+     *  @param {Vector2} position - World space position of the emitter
+     *  @param {Number} [angle] - Angle to emit the particles
+     *  @param {Number|Vector2}  [emitSize] - World space size of the emitter (float for circle diameter, vec2 for rect)
+     *  @param {Number} [emitTime] - How long to stay alive (0 is forever)
+     *  @param {Number} [emitRate] - How many particles per second to spawn, does not emit if 0
+     *  @param {Number} [emitConeAngle=PI] - Local angle to apply velocity to particles from emitter
+     *  @param {TileInfo} [tileInfo] - Tile info to render particles (undefined is untextured)
+     *  @param {Color} [colorStartA=(1,1,1,1)] - Color at start of life 1, randomized between start colors
+     *  @param {Color} [colorStartB=(1,1,1,1)] - Color at start of life 2, randomized between start colors
+     *  @param {Color} [colorEndA=(1,1,1,0)] - Color at end of life 1, randomized between end colors
+     *  @param {Color} [colorEndB=(1,1,1,0)] - Color at end of life 2, randomized between end colors
+     *  @param {Number} [particleTime]      - How long particles live
+     *  @param {Number} [sizeStart]         - How big are particles at start
+     *  @param {Number} [sizeEnd]           - How big are particles at end
+     *  @param {Number} [speed]             - How fast are particles when spawned
+     *  @param {Number} [angleSpeed]        - How fast are particles rotating
+     *  @param {Number} [damping]           - How much to dampen particle speed
+     *  @param {Number} [angleDamping]      - How much to dampen particle angular speed
+     *  @param {Number} [gravityScale]      - How much gravity effect particles
+     *  @param {Number} [particleConeAngle] - Cone for start particle angle
+     *  @param {Number} [fadeRate]          - How quick to fade particles at start/end in percent of life
+     *  @param {Number} [randomness]    - Apply extra randomness percent
+     *  @param {Boolean} [collideTiles] - Do particles collide against tiles
+     *  @param {Boolean} [additive]     - Should particles use addtive blend
+     *  @param {Boolean} [randomColorLinear] - Should color be randomized linearly or across each component
+     *  @param {Number} [renderOrder] - Render order for particles (additive is above other stuff by default)
+     *  @param {Boolean}  [localSpace] - Should it be in local space of emitter (world space is default)
      */
     constructor
     ( 
-        pos,
+        position,
         angle,
         emitSize = 0,
         emitTime = 0,
@@ -3850,17 +3682,17 @@ class ParticleEmitter extends EngineObject
         particleConeAngle = PI,
         fadeRate = .1,
         randomness = .2, 
-        collideTiles,
-        additive,
-        randomColorLinear = 1,
+        collideTiles = false,
+        additive = false,
+        randomColorLinear = true,
         renderOrder = additive ? 1e9 : 0,
-        localSpace
+        localSpace = false
     )
     {
-        super(pos, vec2(), tileInfo, angle, undefined, renderOrder);
+        super(position, vec2(), tileInfo, angle, undefined, renderOrder);
 
         // emitter settings
-        /** @property {Number} - World space size of the emitter (float for circle diameter, vec2 for rect) */
+        /** @property {Number|Vector2} - World space size of the emitter (float for circle diameter, vec2 for rect) */
         this.emitSize = emitSize
         /** @property {Number} - How long to stay alive (0 is forever) */
         this.emitTime = emitTime;
@@ -3906,14 +3738,17 @@ class ParticleEmitter extends EngineObject
         this.randomness        = randomness;
         /** @property {Boolean} - Do particles collide against tiles */
         this.collideTiles      = collideTiles;
-        /** @property {Number} - Should particles use addtive blend */
+        /** @property {Boolean} - Should particles use addtive blend */
         this.additive          = additive;
         /** @property {Boolean} - Should it be in local space of emitter */
-        this.localSpace          = localSpace;
-        /** @property {Number} - If set the partile is drawn as a trail, stretched in the drection of velocity */
+        this.localSpace        = localSpace;
+        /** @property {Number} - If non zero the partile is drawn as a trail, stretched in the drection of velocity */
         this.trailScale        = 0;
-
-        // internal variables
+        /** @property {Function}   - Callback when particle is destroyed */
+        this.particleDestroyCallback = undefined;
+        /** @property {Function}   - Callback when particle is created */
+        this.particleCreateCallback = undefined;
+        /** @property {Number} - Track particle emit time */
         this.emitTimeBuffer    = 0;
     }
     
@@ -3945,18 +3780,16 @@ class ParticleEmitter extends EngineObject
     emitParticle()
     {
         // spawn a particle
-        let pos = this.emitSize.x != undefined ? // check if vec2 was used for size
-            vec2(rand(-.5,.5), rand(-.5,.5))
-                .multiply(this.emitSize).rotate(this.angle) // box emitter
-            : randInCircle(this.emitSize/2);                // circle emitter
+        let pos = typeof this.emitSize === 'number' ? // check if number was used
+            randInCircle(this.emitSize/2)              // circle emitter
+            : vec2(rand(-.5,.5), rand(-.5,.5))         // box emitter
+                .multiply(this.emitSize).rotate(this.angle)
         let angle = rand(this.particleConeAngle, -this.particleConeAngle);
         if (!this.localSpace)
         {
             pos = this.pos.add(pos);
             angle += this.angle;
         }
-            
-        const particle = new Particle(pos, this.tileInfo, this.tileSize, angle);
 
         // randomness scales each paremeter by a percentage
         const randomness = this.randomness;
@@ -3972,15 +3805,11 @@ class ParticleEmitter extends EngineObject
         const colorStart    = randColor(this.colorStartA, this.colorStartB, this.randomColorLinear);
         const colorEnd      = randColor(this.colorEndA,   this.colorEndB, this.randomColorLinear);
         const velocityAngle = this.localSpace ? coneAngle : this.angle + coneAngle;
-
-        // build particle settings
-        particle.colorStart    = colorStart;
-        particle.colorEndDelta = colorEnd.subtract(colorStart);
+        
+        // build particle
+        const particle = new Particle(pos, this.tileInfo, angle, colorStart, colorEnd, particleTime, sizeStart, sizeEnd, this.fadeRate, this.additive,  this.trailScale, this.localSpace && this, this.particleDestroyCallback);
         particle.velocity      = vec2().setAngle(velocityAngle, speed);
         particle.angleVelocity = angleSpeed;
-        particle.lifeTime      = particleTime;
-        particle.sizeStart     = sizeStart;
-        particle.sizeEndDelta  = sizeEnd - sizeStart;
         particle.fadeRate      = this.fadeRate;
         particle.damping       = this.damping;
         particle.angleDamping  = this.angleDamping;
@@ -3988,14 +3817,10 @@ class ParticleEmitter extends EngineObject
         particle.friction      = this.friction;
         particle.gravityScale  = this.gravityScale;
         particle.collideTiles  = this.collideTiles;
-        particle.additive      = this.additive;
         particle.renderOrder   = this.renderOrder;
-        particle.trailScale    = this.trailScale;
-        particle.mirror        = randInt(2);
-        particle.localSpaceEmitter = this.localSpace && this;
+        particle.mirror        = !!randInt(2);
 
-        // setup callbacks for particles
-        particle.destroyCallback = this.particleDestroyCallback;
+        // call particle create callaback
         this.particleCreateCallback && this.particleCreateCallback(particle);
 
         // return the newly created particle
@@ -4014,13 +3839,47 @@ class ParticleEmitter extends EngineObject
 class Particle extends EngineObject
 {
     /**
-     * Create a particle with the given settings
-     * @param {Vector2} position                   - World space position of the particle
-     * @param {TileInfo} [tileInfo]                - Tile info to render particles (undefined is untextured)
-     * @param {Number}  [angle=0]                  - Angle to rotate the particle
+     * Create a particle with the given shis.colorStart = undefined;ettings
+     * @param {Vector2}  position     - World space position of the particle
+     * @param {TileInfo} [tileInfo]   - Tile info to render particles
+     * @param {Number}   [angle]      - Angle to rotate the particle
+     * @param {Color}    [colorStart] - Color at start of life
+     * @param {Color}    [colorEnd]   - Color at end of life
+     * @param {Number}   [lifeTime]   - How long to live for
+     * @param {Number}   [sizeStart]  - Angle to rotate the particle
+     * @param {Number}   [sizeEnd]    - Angle to rotate the particle
+     * @param {Number}   [fadeRate]   - Angle to rotate the particle
+     * @param {Boolean}  [additive]   - Angle to rotate the particle
+     * @param {Number}   [trailScale] - If a trail, how long to make it
+     * @param {ParticleEmitter} [localSpaceEmitter] - Parent emitter if local space
+     * @param {Function}  [destroyCallback] - Called when particle dies
      */
-    constructor(pos, tileInfo, angle)
-    { super(pos, vec2(), tileInfo, angle); }
+    constructor(position, tileInfo, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, fadeRate, additive, trailScale, localSpaceEmitter, destroyCallback
+    )
+    { 
+        super(position, vec2(), tileInfo, angle); 
+    
+        /** @property {Color} - Color at start of life */
+        this.colorStart = colorStart;
+        /** @property {Color} - Calculated change in color */
+        this.colorEndDelta = colorEnd.subtract(colorStart);
+        /** @property {Number} - How long to live for */
+        this.lifeTime = lifeTime;
+        /** @property {Number} - Size at start of life */
+        this.sizeStart = sizeStart;
+        /** @property {Number} - Calculated change in size */
+        this.sizeEndDelta = sizeEnd - sizeStart;
+        /** @property {Number} - How quick to fade in/out */
+        this.fadeRate = fadeRate;
+        /** @property {Boolean} - Is it additive */
+        this.additive = additive;
+        /** @property {Number} - If a trail, how long to make it */
+        this.trailScale = trailScale;
+        /** @property {ParticleEmitter} - Parent emitter if local space */
+        this.localSpaceEmitter = localSpaceEmitter;
+        /** @property {Function} - Called when particle dies */
+        this.destroyCallback = destroyCallback;
+    }
 
     /** Render the particle, automatically called each frame, sorted by renderOrder */
     render()
@@ -4038,7 +3897,7 @@ class Particle extends EngineObject
              (p < fadeRate ? p/fadeRate : p > 1-fadeRate ? (1-p)/fadeRate : 1)); // fade alpha
 
         // draw the particle
-        this.additive && setBlendMode(1);
+        this.additive && setBlendMode(true);
 
         let pos = this.pos, angle = this.angle;
         if (this.localSpaceEmitter)
@@ -4128,7 +3987,7 @@ class Medal
      *  @param {Number} id            - The unique identifier of the medal
      *  @param {String} name          - Name of the medal
      *  @param {String} [description] - Description of the medal
-     *  @param {String} [icon='🏆']  - Icon for the medal
+     *  @param {String} [icon]        - Icon for the medal
      *  @param {String} [src]         - Image location for the medal
      */
     constructor(id, name, description='', icon='🏆', src)
@@ -4151,14 +4010,14 @@ class Medal
             return;
 
         // save the medal
-        ASSERT(medalsSaveName); // save name must be set
+        ASSERT(medalsSaveName, 'save name must be set');
         localStorage[this.storageKey()] = this.unlocked = 1;
         medalsDisplayQueue.push(this);
         newgrounds && newgrounds.unlockMedal(this.id);
     }
 
     /** Render a medal
-     *  @param {Number} [hidePercent=0] - How much to slide the medal off screen
+     *  @param {Number} [hidePercent] - How much to slide the medal off screen
      */
     render(hidePercent=0)
     {
@@ -4170,25 +4029,25 @@ class Medal
         // draw containing rect and clip to that region
         context.save();
         context.beginPath();
-        context.fillStyle = new Color(.9,.9,.9);
-        context.strokeStyle = new Color(0,0,0);
+        context.fillStyle = new Color(.9,.9,.9).toString();
+        context.strokeStyle = new Color(0,0,0).toString();
         context.lineWidth = 3;
-        context.fill(context.rect(x, y, width, medalDisplaySize.y));
+        context.rect(x, y, width, medalDisplaySize.y);
+        context.fill();
         context.stroke();
         context.clip();
 
         // draw the icon and text
         this.renderIcon(vec2(x+15+medalDisplayIconSize/2, y+medalDisplaySize.y/2));
         const pos = vec2(x+medalDisplayIconSize+30, y+28);
-        drawTextScreen(this.name, pos, 38, new Color(0,0,0), 0, 0, 'left');
+        drawTextScreen(this.name, pos, 38, new Color(0,0,0), 0, undefined, 'left');
         pos.y += 32;
-        drawTextScreen(this.description, pos, 24, new Color(0,0,0), 0, 0, 'left');
+        drawTextScreen(this.description, pos, 24, new Color(0,0,0), 0, undefined, 'left');
         context.restore();
     }
 
     /** Render the icon for a medal
-     *  @param {Number} x - Screen space X position
-     *  @param {Number} y - Screen space Y position
+     *  @param {Vector2} pos - Screen space position
      *  @param {Number} [size=medalDisplayIconSize] - Screen space size
      */
     renderIcon(pos, size=medalDisplayIconSize)
@@ -4216,7 +4075,10 @@ function medalsRender()
     if (!medalsDisplayTimeLast)
         medalsDisplayTimeLast = timeReal;
     else if (time > medalDisplayTime)
-        medalsDisplayQueue.shift(medalsDisplayTimeLast = 0);
+    {
+        medalsDisplayTimeLast = 0;
+        medalsDisplayQueue.shift();
+    }
     else
     {
         // slide on/off medals
@@ -4256,8 +4118,8 @@ class Newgrounds
      *  @param {Object} [cryptoJS] - An instance of CryptoJS, if there is a cipher */
     constructor(app_id, cipher, cryptoJS)
     {
-        ASSERT(!newgrounds && app_id); // can only be one newgrounds object
-        ASSERT(!cipher || cryptoJS);   // must provide cryptojs if there is a cipher
+        ASSERT(!newgrounds && app_id>0, 'there can only be one newgrounds object');
+        ASSERT(!cipher || cryptoJS, 'must provide cryptojs if there is a cipher');
 
         this.app_id = app_id;
         this.cipher = cipher;
@@ -4300,39 +4162,39 @@ class Newgrounds
         debugMedals && console.log(this.scoreboards);
 
         const keepAliveMS = 5 * 60 * 1e3;
-        setInterval(()=>this.call('Gateway.ping', 0, 1), keepAliveMS);
+        setInterval(()=>this.call('Gateway.ping', 0, true), keepAliveMS);
     }
 
     /** Send message to unlock a medal by id
      * @param {Number} id - The medal id */
-    unlockMedal(id) { return this.call('Medal.unlock', {'id':id}, 1); }
+    unlockMedal(id) { return this.call('Medal.unlock', {'id':id}, true); }
 
     /** Send message to post score
      * @param {Number} id    - The scoreboard id
      * @param {Number} value - The score value */
-    postScore(id, value) { return this.call('ScoreBoard.postScore', {'id':id, 'value':value}, 1); }
+    postScore(id, value) { return this.call('ScoreBoard.postScore', {'id':id, 'value':value}, true); }
 
     /** Get scores from a scoreboard
-     * @param {Number} id         - The scoreboard id
-     * @param {String} [user=0]   - A user's id or name
-     * @param {Number} [social=0] - If true, only social scores will be loaded
-     * @param {Number} [skip=0]   - Number of scores to skip before start
-     * @param {Number} [limit=10] - Number of scores to include in the list
-     * @return {Object}           - The response JSON object
+     * @param {Number} id       - The scoreboard id
+     * @param {String} [user]   - A user's id or name
+     * @param {Number} [social] - If true, only social scores will be loaded
+     * @param {Number} [skip]   - Number of scores to skip before start
+     * @param {Number} [limit]  - Number of scores to include in the list
+     * @return {Object}         - The response JSON object
      */
-    getScores(id, user=0, social=0, skip=0, limit=10)
+    getScores(id, user, social=0, skip=0, limit=10)
     { return this.call('ScoreBoard.getScores', {'id':id, 'user':user, 'social':social, 'skip':skip, 'limit':limit}); }
 
     /** Send message to log a view */
-    logView() { return this.call('App.logView', {'host':this.host}, 1); }
+    logView() { return this.call('App.logView', {'host':this.host}, true); }
 
     /** Send a message to call a component of the Newgrounds API
-     * @param {String}  component      - Name of the component
-     * @param {Object}  [parameters=0] - Parameters to use for call
-     * @param {Boolean} [async=0]      - If true, don't wait for response before continuing (avoid stall)
-     * @return {Object}                - The response JSON object
+     * @param {String}  component    - Name of the component
+     * @param {Object}  [parameters] - Parameters to use for call
+     * @param {Boolean} [async]      - If true, don't wait for response before continuing
+     * @return {Object}              - The response JSON object
      */
-    call(component, parameters=0, async=0)
+    call(component, parameters, async=false)
     {
         const call = {'component':component, 'parameters':parameters};
         if (this.cipher)
@@ -4347,7 +4209,7 @@ class Newgrounds
         }
 
         // build the input object
-        const input = 
+        const input =
         {
             'app_id':     this.app_id,
             'session_id': this.session_id,
@@ -4367,7 +4229,7 @@ class Newgrounds
         return xmlHttp.responseText && JSON.parse(xmlHttp.responseText);
     }
 }
-/** 
+/**
  * LittleJS WebGL Interface
  * - All webgl used by the engine is wrapped up here
  * - For normal stuff you won't need to see or call anything in this file
@@ -4386,13 +4248,13 @@ class Newgrounds
  *  @memberof WebGL */
 let glCanvas;
 
-/** 2d context for glCanvas 
- *  @type {WebGLRenderingContext}
+/** 2d context for glCanvas
+ *  @type {WebGL2RenderingContext}
  *  @memberof WebGL */
 let glContext;
 
 // WebGL internal variables not exposed to documentation
-let glActiveTexture, glShader, glArrayBuffer, glPositionData, glColorData, glBatchCount, glBatchAdditive, glAdditive;
+let glShader, glActiveTexture, glArrayBuffer, glGeometryBuffer, glPositionData, glColorData, glInstanceCount, glAdditive, glBatchAdditive;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -4408,73 +4270,89 @@ function glInit()
 
     // setup vertex and fragment shaders
     glShader = glCreateProgram(
-        '#version 300 es\n' +         // specify GLSL ES version
-        'precision highp float;'+     // use highp for better accuracy
-        'uniform mat4 m;'+            // transform matrix
-        'in vec4 p,c,a;'+             // position, uv, color, additiveColor
-        'out vec4 v,d,e;'+            // return uv, color, additiveColor
-        'void main(){'+               // shader entry point
-        'gl_Position=m*vec4(p.xy,1,1);'+ // transform position
-        'v=p;d=c;e=a;'+               // pass stuff to fragment shader
-        '}'                           // end of shader
+        '#version 300 es\n' +     // specify GLSL ES version
+        'precision highp float;'+ // use highp for better accuracy
+        'uniform mat4 m;'+        // transform matrix
+        'in vec2 g;'+             // geometry
+        'in vec4 p,u,c,a;'+       // position/size, uvs, color, additiveColor
+        'in float r;'+            // rotation
+        'out vec2 v;'+            // return uv, color, additiveColor
+        'out vec4 d,e;'+          // return uv, color, additiveColor
+        'void main(){'+           // shader entry point
+        'vec2 s=(g-.5)*p.zw;'+    // get size offset
+        'gl_Position=m*vec4(p.xy+s*cos(r)-vec2(-s.y,s)*sin(r),1,1);'+ // transform position
+        'v=mix(u.xw,u.zy,g);'+    // pass uv to fragment shader
+        'd=c;e=a;'+               // pass colors to fragment shader
+        '}'                       // end of shader
         ,
-        '#version 300 es\n' +         // specify GLSL ES version
-        'precision highp float;'+     // use highp for better accuracy
-        'in vec4 v,d,e;'+             // position, uv, color, additiveColor
-        'uniform sampler2D s;'+       // texture
-        'out vec4 c;'+                // out color
-        'void main(){'+               // shader entry point
-        'c=texture(s,v.zw)*d+e;'+     // modulate texture by color plus additive
-        '}'                           // end of shader
+        '#version 300 es\n' +     // specify GLSL ES version
+        'precision highp float;'+ // use highp for better accuracy
+        'in vec2 v;'+             // uv
+        'in vec4 d,e;'+           // color, additiveColor
+        'uniform sampler2D s;'+   // texture
+        'out vec4 c;'+            // out color
+        'void main(){'+           // shader entry point
+        'c=texture(s,v)*d+e;'+    // modulate texture by color plus additive
+        '}'                       // end of shader
     );
 
     // init buffers
-    const vertexData = new ArrayBuffer(gl_VERTEX_BUFFER_SIZE);
+    const glInstanceData = new ArrayBuffer(gl_INSTANCE_BUFFER_SIZE);
+    glPositionData = new Float32Array(glInstanceData);
+    glColorData = new Uint32Array(glInstanceData);
     glArrayBuffer = glContext.createBuffer();
-    glPositionData = new Float32Array(vertexData);
-    glColorData = new Uint32Array(vertexData);
-    glBatchCount = 0;
+    glGeometryBuffer = glContext.createBuffer();
+
+    // create the geometry buffer, triangle strip square
+    const geometry = new Float32Array([glInstanceCount=0,0,1,0,0,1,1,1]);
+    glContext.bindBuffer(gl_ARRAY_BUFFER, glGeometryBuffer);
+    glContext.bufferData(gl_ARRAY_BUFFER, geometry, gl_STATIC_DRAW);
 }
 
 // Setup render each frame, called automatically by engine
 function glPreRender()
 {
     // clear and set to same size as main canvas
-    glContext.viewport(0, 0, glCanvas.width = mainCanvas.width, glCanvas.height = mainCanvas.height);
+    glContext.viewport(0, 0, glCanvas.width=mainCanvas.width, glCanvas.height=mainCanvas.height);
     glContext.clear(gl_COLOR_BUFFER_BIT);
 
     // set up the shader
     glContext.useProgram(glShader);
     glContext.activeTexture(gl_TEXTURE0);
     glContext.bindTexture(gl_TEXTURE_2D, glActiveTexture = textureInfos[0].glTexture);
-    glContext.bindBuffer(gl_ARRAY_BUFFER, glArrayBuffer);
-    glContext.bufferData(gl_ARRAY_BUFFER, gl_VERTEX_BUFFER_SIZE, gl_DYNAMIC_DRAW);
-    glAdditive = 0;
-    
+
     // set vertex attributes
-    let offset = 0;
-    const initVertexAttribArray = (name, type, typeSize, size, normalize=0)=>
+    let offset = glAdditive = glBatchAdditive = 0;
+    let initVertexAttribArray = (name, type, typeSize, size)=>
     {
         const location = glContext.getAttribLocation(glShader, name);
+        const stride = typeSize && gl_INSTANCE_BYTE_STRIDE; // only if not geometry
+        const divisor = typeSize && 1; // only if not geometry
+        const normalize = typeSize==1; // only if color
         glContext.enableVertexAttribArray(location);
-        glContext.vertexAttribPointer(location, size, type, normalize, gl_VERTEX_BYTE_STRIDE, offset);
+        glContext.vertexAttribPointer(location, size, type, normalize, stride, offset);
+        glContext.vertexAttribDivisor(location, divisor);
         offset += size*typeSize;
     }
-    initVertexAttribArray('p', gl_FLOAT, 4, 4);            // position & texture coords
-    initVertexAttribArray('c', gl_UNSIGNED_BYTE, 1, 4, 1); // color
-    initVertexAttribArray('a', gl_UNSIGNED_BYTE, 1, 4, 1); // additiveColor
+    glContext.bindBuffer(gl_ARRAY_BUFFER, glGeometryBuffer);
+    initVertexAttribArray('g', gl_FLOAT, 0, 2); // geometry
+    glContext.bindBuffer(gl_ARRAY_BUFFER, glArrayBuffer);
+    glContext.bufferData(gl_ARRAY_BUFFER, gl_INSTANCE_BUFFER_SIZE, gl_DYNAMIC_DRAW);
+    initVertexAttribArray('p', gl_FLOAT, 4, 4); // position & size
+    initVertexAttribArray('u', gl_FLOAT, 4, 4); // texture coords
+    initVertexAttribArray('c', gl_UNSIGNED_BYTE, 1, 4); // color
+    initVertexAttribArray('a', gl_UNSIGNED_BYTE, 1, 4); // additiveColor
+    initVertexAttribArray('r', gl_FLOAT, 4, 1); // rotation
 
     // build the transform matrix
-    const sx = 2 * cameraScale / mainCanvas.width;
-    const sy = 2 * cameraScale / mainCanvas.height;
-    const cx = -1 - sx*cameraPos.x;
-    const cy = -1 - sy*cameraPos.y;
-    glContext.uniformMatrix4fv(glContext.getUniformLocation(glShader, 'm'), 0,
+    const s = vec2(2*cameraScale).divide(mainCanvasSize);
+    const p = vec2(-1).subtract(cameraPos.multiply(s));
+    glContext.uniformMatrix4fv(glContext.getUniformLocation(glShader, 'm'), false,
         new Float32Array([
-            sx,  0,  0,  0,
-             0, sy,  0,  0,
-             1,  1, -1,  1,
-            cx, cy,  0,  0
+            s.x, 0,   0,   0,
+            0,   s.y, 0,   0,
+            1,   1,   1,   1,
+            p.x, p.y, 0,   0
         ])
     );
 }
@@ -4495,7 +4373,7 @@ function glSetTexture(texture)
 
 /** Compile WebGL shader of the given type, will throw errors if in debug mode
  *  @param {String} source
- *  @param          type
+ *  @param {Number} type
  *  @return {WebGLShader}
  *  @memberof WebGL */
 function glCompileShader(source, type)
@@ -4512,8 +4390,8 @@ function glCompileShader(source, type)
 }
 
 /** Create WebGL program with given shaders
- *  @param {WebGLShader} vsSource
- *  @param {WebGLShader} fsSource
+ *  @param {String} vsSource
+ *  @param {String} fsSource
  *  @return {WebGLProgram}
  *  @memberof WebGL */
 function glCreateProgram(vsSource, fsSource)
@@ -4531,7 +4409,7 @@ function glCreateProgram(vsSource, fsSource)
 }
 
 /** Create WebGL texture from an image and init the texture settings
- *  @param {Image} image
+ *  @param {HTMLImageElement} image
  *  @return {WebGLTexture}
  *  @memberof WebGL */
 function glCreateTexture(image)
@@ -4541,13 +4419,12 @@ function glCreateTexture(image)
     glContext.bindTexture(gl_TEXTURE_2D, texture);
     if (image)
         glContext.texImage2D(gl_TEXTURE_2D, 0, gl_RGBA, gl_RGBA, gl_UNSIGNED_BYTE, image);
-        
+
     // use point filtering for pixelated rendering
     const filter = canvasPixelated ? gl_NEAREST : gl_LINEAR;
     glContext.texParameteri(gl_TEXTURE_2D, gl_TEXTURE_MIN_FILTER, filter);
     glContext.texParameteri(gl_TEXTURE_2D, gl_TEXTURE_MAG_FILTER, filter);
-    glContext.texParameteri(gl_TEXTURE_2D, gl_TEXTURE_WRAP_S, gl_CLAMP_TO_EDGE);
-    glContext.texParameteri(gl_TEXTURE_2D, gl_TEXTURE_WRAP_T, gl_CLAMP_TO_EDGE);
+
     return texture;
 }
 
@@ -4555,30 +4432,31 @@ function glCreateTexture(image)
  *  @memberof WebGL */
 function glFlush()
 {
-    if (!glBatchCount) return;
+    if (!glInstanceCount) return;
 
     const destBlend = glBatchAdditive ? gl_ONE : gl_ONE_MINUS_SRC_ALPHA;
     glContext.blendFuncSeparate(gl_SRC_ALPHA, destBlend, gl_ONE, destBlend);
     glContext.enable(gl_BLEND);
 
     // draw all the sprites in the batch and reset the buffer
-    glContext.bufferSubData(gl_ARRAY_BUFFER, 0, 
-        glPositionData.subarray(0, glBatchCount * gl_INDICIES_PER_VERT));
-    glContext.drawArrays(gl_TRIANGLE_STRIP, 0, glBatchCount);
-    glBatchCount = 0;
+    glContext.bufferSubData(gl_ARRAY_BUFFER, 0, glPositionData);
+    glContext.drawArraysInstanced(gl_TRIANGLE_STRIP, 0, 4, glInstanceCount);
+    if (showWatermark)
+        drawCount += glInstanceCount;
+    glInstanceCount = 0;
     glBatchAdditive = glAdditive;
 }
 
 /** Draw any sprites still in the buffer, copy to main canvas and clear
  *  @param {CanvasRenderingContext2D} context
- *  @param {Boolean} [forceDraw=0]
+ *  @param {Boolean} [forceDraw]
  *  @memberof WebGL */
-function glCopyToContext(context, forceDraw)
+function glCopyToContext(context, forceDraw=false)
 {
-    if (!glBatchCount && !forceDraw) return;
-    
+    if (!glInstanceCount && !forceDraw) return;
+
     glFlush();
-    
+
     // do not draw in overlay mode because the canvas is visible
     if (!glOverlay || forceDraw)
         context.drawImage(glCanvas, 0, 0);
@@ -4599,75 +4477,39 @@ function glCopyToContext(context, forceDraw)
  *  @memberof WebGL */
 function glDraw(x, y, sizeX, sizeY, angle, uv0X, uv0Y, uv1X, uv1Y, rgba, rgbaAdditive=0)
 {
+    ASSERT(typeof rgba == 'number' && typeof rgbaAdditive == 'number', 'invalid color');
+
     // flush if there is not enough room or if different blend mode
-    const vertCount = 6;
-    if (glBatchCount >= gl_MAX_BATCH-vertCount || glBatchAdditive != glAdditive)
+    if (glInstanceCount >= gl_MAX_INSTANCES || glBatchAdditive != glAdditive)
         glFlush();
 
-    // prepare to create the verts from size and angle
-    const c = Math.cos(angle)/2, s = Math.sin(angle)/2;
-    const cx = c*sizeX, cy = c*sizeY, sx = s*sizeX, sy = s*sizeY;
-    const positionData = 
-    [
-        x-cx+sy, y+cy+sx, uv0X, uv0Y,
-        x-cx-sy, y-cy+sx, uv0X, uv1Y,
-        x+cx+sy, y+cy-sx, uv1X, uv0Y,
-        x+cx-sy, y-cy-sx, uv1X, uv1Y,
-    ];
-
-    // setup 2 triangle strip quad
-    for(let i = vertCount, offset = glBatchCount * gl_INDICIES_PER_VERT; i--;)
-    {
-        let j = clamp(i-1, 0, 3)*4;  // degenerate tri at ends
-        glPositionData[offset++] = positionData[j++];
-        glPositionData[offset++] = positionData[j++];
-        glPositionData[offset++] = positionData[j++];
-        glPositionData[offset++] = positionData[j++];
-        glColorData[offset++] = rgba; 
-        glColorData[offset++] = rgbaAdditive;
-    }
-    glBatchCount += vertCount;
-}
-
-/** Add a convex polygon to the gl draw list
- *  @param {Array} points - Array of Vector2 points
- *  @param {Number} rgba - Color of the polygon
- *  @memberof WebGL */
-function glDrawPoints(points, rgba)
-{
-    // flush if there is not enough room or if different blend mode
-    const vertCount = points.length + 2;
-    if (glBatchCount >= gl_MAX_BATCH-vertCount || glBatchAdditive != glAdditive)
-        glFlush();
-  
-    // setup triangle strip from list of points
-    for(let i = vertCount, offset = glBatchCount * gl_INDICIES_PER_VERT; i--;)
-    {
-        const j = clamp(i-1, 0, vertCount-3);  // degenerate tri at ends
-        const h = j>>1;
-        const point = points[j%2? h : vertCount-3-h];
-        glPositionData[offset++] = point.x;
-        glPositionData[offset++] = point.y;
-        glPositionData[offset++] = 0; // uvx
-        glPositionData[offset++] = 0; // uvy
-        glColorData[offset++] = 0;    // nothing to tint
-        glColorData[offset++] = rgba; // apply rgba via additive
-    }
-    glBatchCount += vertCount;
+    let offset = glInstanceCount * gl_INDICIES_PER_INSTANCE;
+    glPositionData[offset++] = x;
+    glPositionData[offset++] = y;
+    glPositionData[offset++] = sizeX;
+    glPositionData[offset++] = sizeY;
+    glPositionData[offset++] = uv0X;
+    glPositionData[offset++] = uv0Y;
+    glPositionData[offset++] = uv1X;
+    glPositionData[offset++] = uv1Y;
+    glColorData[offset++] = rgba;
+    glColorData[offset++] = rgbaAdditive;
+    glPositionData[offset++] = angle;
+    glInstanceCount++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // post processing - can be enabled to pass other canvases through a final shader
 
-let glPostShader, glPostArrayBuffer, glPostTexture, glPostIncludeOverlay;
+let glPostShader, glPostTexture, glPostIncludeOverlay;
 
 /** Set up a post processing shader
  *  @param {String} shaderCode
  *  @param {Boolean} includeOverlay
  *  @memberof WebGL */
-function glInitPostProcess(shaderCode, includeOverlay)
+function glInitPostProcess(shaderCode, includeOverlay=false)
 {
-    ASSERT(!glPostShader); // can only have 1 post effects shader
+    ASSERT(!glPostShader, 'can only have 1 post effects shader');
 
     if (!shaderCode) // default shader pass through
         shaderCode = 'void mainImage(out vec4 c,vec2 p){c=texture(iChannel0,p/iResolution.xy);}';
@@ -4678,14 +4520,14 @@ function glInitPostProcess(shaderCode, includeOverlay)
         'precision highp float;'+        // use highp for better accuracy
         'in vec2 p;'+                    // position
         'void main(){'+                  // shader entry point
-        'gl_Position=vec4(p,1,1);'+      // set position
+        'gl_Position=vec4(p+p-1.,1,1);'+ // set position
         '}'                              // end of shader
         ,
         '#version 300 es\n' +            // specify GLSL ES version
         'precision highp float;'+        // use highp for better accuracy
         'uniform sampler2D iChannel0;'+  // input texture
         'uniform vec3 iResolution;'+     // size of output texture
-        'uniform float iTime;'+          // time passed
+        'uniform float iTime;'+          // time
         'out vec4 c;'+                   // out color
         '\n' + shaderCode + '\n'+        // insert custom shader code
         'void main(){'+                  // shader entry point
@@ -4695,12 +4537,13 @@ function glInitPostProcess(shaderCode, includeOverlay)
     );
 
     // create buffer and texture
-    glPostArrayBuffer = glContext.createBuffer();
-    glPostTexture = glCreateTexture();
+    glPostTexture = glCreateTexture(undefined);
     glPostIncludeOverlay = includeOverlay;
 
     // hide the original 2d canvas
     mainCanvas.style.visibility = 'hidden';
+    if (glPostIncludeOverlay)
+        overlayCanvas.style.visibility = 'hidden';
 }
 
 // Render the post processing shader, called automatically by the engine
@@ -4721,21 +4564,14 @@ function glRenderPostProcess()
         glContext.viewport(0, 0, glCanvas.width = mainCanvas.width, glCanvas.height = mainCanvas.height);
     }
 
-    if (glPostIncludeOverlay)
-    {
-        // copy overlay canvas so it will be included in post processing
-        mainContext.drawImage(overlayCanvas, 0, 0);
-
-        // clear overlay canvas
-        overlayCanvas.width = mainCanvas.width;
-    }
+    // copy overlay canvas so it will be included in post processing
+    glPostIncludeOverlay && mainContext.drawImage(overlayCanvas, 0, 0);
 
     // setup shader program to draw one triangle
     glContext.useProgram(glPostShader);
+    glContext.bindBuffer(gl_ARRAY_BUFFER, glGeometryBuffer);
+    glContext.pixelStorei(gl_UNPACK_FLIP_Y_WEBGL, 1);
     glContext.disable(gl_BLEND);
-    glContext.bindBuffer(gl_ARRAY_BUFFER, glPostArrayBuffer);
-    glContext.bufferData(gl_ARRAY_BUFFER, new Float32Array([-3,1,1,-3,1,1]), gl_STATIC_DRAW);
-    glContext.pixelStorei(gl_UNPACK_FLIP_Y_WEBGL, true);
 
     // set textures, pass in the 2d canvas and gl canvas in separate texture channels
     glContext.activeTexture(gl_TEXTURE0);
@@ -4746,19 +4582,19 @@ function glRenderPostProcess()
     const vertexByteStride = 8;
     const pLocation = glContext.getAttribLocation(glPostShader, 'p');
     glContext.enableVertexAttribArray(pLocation);
-    glContext.vertexAttribPointer(pLocation, 2, gl_FLOAT, 0, vertexByteStride, 0);
+    glContext.vertexAttribPointer(pLocation, 2, gl_FLOAT, false, vertexByteStride, 0);
 
     // set uniforms and draw
     const uniformLocation = (name)=>glContext.getUniformLocation(glPostShader, name);
     glContext.uniform1i(uniformLocation('iChannel0'), 0);
     glContext.uniform1f(uniformLocation('iTime'), time);
     glContext.uniform3f(uniformLocation('iResolution'), mainCanvas.width, mainCanvas.height, 1);
-    glContext.drawArrays(gl_TRIANGLE_STRIP, 0, 3);
+    glContext.drawArrays(gl_TRIANGLE_STRIP, 0, 4);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // store gl constants as integers so their name doesn't use space in minifed
-const 
+const
 gl_ONE = 1,
 gl_TRIANGLE_STRIP = 5,
 gl_SRC_ALPHA = 770,
@@ -4772,27 +4608,24 @@ gl_NEAREST = 9728,
 gl_LINEAR = 9729,
 gl_TEXTURE_MAG_FILTER = 10240,
 gl_TEXTURE_MIN_FILTER = 10241,
-gl_TEXTURE_WRAP_S = 10242,
-gl_TEXTURE_WRAP_T = 10243,
 gl_COLOR_BUFFER_BIT = 16384,
-gl_CLAMP_TO_EDGE = 33071,
 gl_TEXTURE0 = 33984,
 gl_ARRAY_BUFFER = 34962,
 gl_STATIC_DRAW = 35044,
 gl_DYNAMIC_DRAW = 35048,
-gl_FRAGMENT_SHADER = 35632, 
+gl_FRAGMENT_SHADER = 35632,
 gl_VERTEX_SHADER = 35633,
 gl_COMPILE_STATUS = 35713,
 gl_LINK_STATUS = 35714,
 gl_UNPACK_FLIP_Y_WEBGL = 37440,
 
 // constants for batch rendering
-gl_INDICIES_PER_VERT = 6,
-gl_MAX_BATCH = 1e5,
-gl_VERTEX_BYTE_STRIDE = (4 * 2) * 2 + (4) * 2, // vec2 * 2 + (char * 4) * 2
-gl_VERTEX_BUFFER_SIZE = gl_MAX_BATCH * gl_VERTEX_BYTE_STRIDE;
+gl_INDICIES_PER_INSTANCE = 11,
+gl_MAX_INSTANCES = 1e4,
+gl_INSTANCE_BYTE_STRIDE = gl_INDICIES_PER_INSTANCE * 4, // 11 * 4
+gl_INSTANCE_BUFFER_SIZE = gl_MAX_INSTANCES * gl_INSTANCE_BYTE_STRIDE;
 /** 
- * LittleJS - The Tiny JavaScript Game Engine That Can!
+ * LittleJS - The Tiny Fast JavaScript Game Engine
  * MIT License - Copyright 2021 Frank Force
  * 
  * Engine Features
@@ -4823,9 +4656,9 @@ const engineName = 'LittleJS';
  *  @type {String}
  *  @default
  *  @memberof Engine */
-const engineVersion = '1.8.6';
+const engineVersion = '1.9.5';
 
-/** Frames per second to update objects
+/** Frames per second to update
  *  @type {Number}
  *  @default
  *  @memberof Engine */
@@ -4842,7 +4675,7 @@ const timeDelta = 1/frameRate;
  *  @memberof Engine */
 let engineObjects = [];
 
-/** Array containing only objects that are set to collide with other objects this frame (for optimization)
+/** Array with only objects set to collide with other objects this frame (for optimization)
  *  @type {Array}
  *  @memberof Engine */
 let engineObjectsCollide = [];
@@ -4852,7 +4685,7 @@ let engineObjectsCollide = [];
  *  @memberof Engine */
 let frame = 0;
 
-/** Current engine time since start in seconds, derived from frame
+/** Current engine time since start in seconds
  *  @type {Number}
  *  @memberof Engine */
 let time = 0;
@@ -4864,31 +4697,44 @@ let timeReal = 0;
 
 /** Is the game paused? Causes time and objects to not be updated
  *  @type {Boolean}
- *  @default 0
+ *  @default false
  *  @memberof Engine */
-let paused = 0;
+let paused = false;
 
 /** Set if game is paused
- *  @param {Boolean} paused
+ *  @param {Boolean} isPaused
  *  @memberof Engine */
-function setPaused(_paused) { paused = _paused; }
+function setPaused(isPaused) { paused = isPaused; }
 
 // Frame time tracking
 let frameTimeLastMS = 0, frameTimeBufferMS = 0, averageFPS = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/** Start up LittleJS engine with your callback functions
- *  @param {Function} gameInit        - Called once after the engine starts up, setup the game
- *  @param {Function} gameUpdate      - Called every frame at 60 frames per second, handle input and update the game state
- *  @param {Function} gameUpdatePost  - Called after physics and objects are updated, setup camera and prepare for render
- *  @param {Function} gameRender      - Called before objects are rendered, draw any background effects that appear behind objects
- *  @param {Function} gameRenderPost  - Called after objects are rendered, draw effects or hud that appear above all objects
+/** Startup LittleJS engine with your callback functions
+ *  @param {Function} gameInit       - Called once after the engine starts up, setup the game
+ *  @param {Function} gameUpdate     - Called every frame at 60 frames per second, handle input and update the game state
+ *  @param {Function} gameUpdatePost - Called after physics and objects are updated, setup camera and prepare for render
+ *  @param {Function} gameRender     - Called before objects are rendered, draw any background effects that appear behind objects
+ *  @param {Function} gameRenderPost - Called after objects are rendered, draw effects or hud that appear above all objects
  *  @param {Array} [imageSources=['tiles.png']] - Image to load
  *  @memberof Engine */
 function engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRenderPost, imageSources=['tiles.png'])
 {
-    ASSERT(Array.isArray(imageSources)); // pass in images as array
+    ASSERT(Array.isArray(imageSources), 'pass in images as array');
+
+    // Called automatically by engine to setup render system
+    function enginePreRender()
+    {
+        // save canvas size
+        mainCanvasSize = vec2(mainCanvas.width, mainCanvas.height);
+
+        // disable smoothing for pixel art
+        mainContext.imageSmoothingEnabled = !canvasPixelated;
+
+        // setup gl rendering if enabled
+        glEnable && glPreRender();
+    }
 
     // internal update loop for engine
     function engineUpdate(frameTimeMS=0)
@@ -4898,40 +4744,15 @@ function engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRender
         frameTimeLastMS = frameTimeMS;
         if (debug || showWatermark)
             averageFPS = lerp(.05, averageFPS, 1e3/(frameTimeDeltaMS||1));
-        const debugSpeedUp   = debug && keyIsDown(107); // +
-        const debugSpeedDown = debug && keyIsDown(109); // -
+        const debugSpeedUp   = debug && keyIsDown('Equal'); // +
+        const debugSpeedDown = debug && keyIsDown('Minus'); // -
         if (debug) // +/- to speed/slow time
             frameTimeDeltaMS *= debugSpeedUp ? 5 : debugSpeedDown ? .2 : 1;
         timeReal += frameTimeDeltaMS / 1e3;
-        frameTimeBufferMS += !paused * frameTimeDeltaMS;
+        frameTimeBufferMS += paused ? 0 : frameTimeDeltaMS;
         if (!debugSpeedUp)
-            frameTimeBufferMS = min(frameTimeBufferMS, 50); // clamp incase of slow framerate
-
-        if (canvasFixedSize.x)
-        {
-            // clear canvas and set fixed size
-            mainCanvas.width  = canvasFixedSize.x;
-            mainCanvas.height = canvasFixedSize.y;
-            
-            // fit to window by adding space on top or bottom if necessary
-            const aspect = innerWidth / innerHeight;
-            const fixedAspect = mainCanvas.width / mainCanvas.height;
-            (glCanvas||mainCanvas).style.width = mainCanvas.style.width = overlayCanvas.style.width  = aspect < fixedAspect ? '100%' : '';
-            (glCanvas||mainCanvas).style.height = mainCanvas.style.height = overlayCanvas.style.height = aspect < fixedAspect ? '' : '100%';
-        }
-        else
-        {
-            // clear canvas and set size to same as window
-            mainCanvas.width  = min(innerWidth,  canvasMaxSize.x);
-            mainCanvas.height = min(innerHeight, canvasMaxSize.y);
-        }
-        
-        // clear overlay canvas and set size
-        overlayCanvas.width  = mainCanvas.width;
-        overlayCanvas.height = mainCanvas.height;
-
-        // save canvas size
-        mainCanvasSize = vec2(mainCanvas.width, mainCanvas.height);
+            frameTimeBufferMS = min(frameTimeBufferMS, 50); // clamp in case of slow framerate
+        updateCanvas();
 
         if (paused)
         {
@@ -5005,15 +4826,44 @@ function engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRender
         requestAnimationFrame(engineUpdate);
     }
 
+    function updateCanvas()
+    {
+        if (canvasFixedSize.x)
+        {
+            // clear canvas and set fixed size
+            mainCanvas.width  = canvasFixedSize.x;
+            mainCanvas.height = canvasFixedSize.y;
+            
+            // fit to window by adding space on top or bottom if necessary
+            const aspect = innerWidth / innerHeight;
+            const fixedAspect = mainCanvas.width / mainCanvas.height;
+            (glCanvas||mainCanvas).style.width = mainCanvas.style.width = overlayCanvas.style.width  = aspect < fixedAspect ? '100%' : '';
+            (glCanvas||mainCanvas).style.height = mainCanvas.style.height = overlayCanvas.style.height = aspect < fixedAspect ? '' : '100%';
+        }
+        else
+        {
+            // clear canvas and set size to same as window
+            mainCanvas.width  = min(innerWidth,  canvasMaxSize.x);
+            mainCanvas.height = min(innerHeight, canvasMaxSize.y);
+        }
+        
+        // clear overlay canvas and set size
+        overlayCanvas.width  = mainCanvas.width;
+        overlayCanvas.height = mainCanvas.height;
+
+        // save canvas size
+        mainCanvasSize = vec2(mainCanvas.width, mainCanvas.height);
+    }
+
     // setup html
-    const styleBody = 
+     const styleBody = 
         'margin:0;overflow:hidden;' + // fill the window
         'background:#000;' +          // set background color
         'touch-action:none;' +        // prevent mobile pinch to resize
         'user-select:none;' +         // prevent mobile hold to select
         '-webkit-user-select:none;' + // compatibility for ios
         '-webkit-touch-callout:none'; // compatibility for ios
-    document.body.style = styleBody;
+    document.body.style.cssText = styleBody;
     document.body.appendChild(mainCanvas = document.createElement('canvas'));
     mainContext = mainCanvas.getContext('2d');
 
@@ -5026,15 +4876,14 @@ function engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRender
     overlayContext = overlayCanvas.getContext('2d');
 
     // set canvas style
-    const styleCanvas = 
-        'position:absolute;' +                               // position
-        'top:50%;left:50%;transform:translate(-50%,-50%);' + // center
-        (canvasPixelated?'image-rendering:pixelated':'');    // pixelated rendering
-    (glCanvas||mainCanvas).style = mainCanvas.style = overlayCanvas.style = styleCanvas;
+    const styleCanvas = 'position:absolute;' +             // position
+        'top:50%;left:50%;transform:translate(-50%,-50%)'; // center
+    (glCanvas||mainCanvas).style.cssText = mainCanvas.style.cssText = overlayCanvas.style.cssText = styleCanvas;
+    updateCanvas();
     
-    // load all of the images
-    Promise.all(imageSources.map((src, textureIndex)=>
-        new Promise((resolve, reject)=> 
+    // create promises for loading images
+    const promises = imageSources.map((src, textureIndex)=>
+        new Promise(resolve => 
         {
             const image = new Image;
             image.onerror = image.onload = ()=> 
@@ -5044,25 +4893,29 @@ function engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRender
             }
             image.src = src;
         })
-    )).then(()=> 
+    );
+
+    // draw splash screen
+    showSplashScreen && promises.push(new Promise(resolve => 
+    {
+        let t = 0;
+        console.log(`${engineName} Engine v${engineVersion}`);
+        updateSplash();
+        function updateSplash()
+        {
+            clearInput();
+            drawEngineSplashScreen(t+=.01);
+            t>1 ? resolve() : setTimeout(updateSplash, 16);
+        }
+    }));
+
+    // load all of the images
+    Promise.all(promises).then(()=> 
     {
         // start the engine
         gameInit();
         engineUpdate();
     });
-}
-
-// Called automatically by engine to setup render system
-function enginePreRender()
-{
-    // save canvas size
-    mainCanvasSize = vec2(mainCanvas.width, mainCanvas.height);
-
-    // disable smoothing for pixel art
-    mainContext.imageSmoothingEnabled = !canvasPixelated;
-
-    // setup gl rendering if enabled
-    glEnable && glPreRender();
 }
 
 /** Update each engine object, remove destroyed objects, and update time
@@ -5098,28 +4951,226 @@ function engineObjectsDestroy()
     engineObjects = engineObjects.filter(o=>!o.destroyed);
 }
 
-/** Triggers a callback for each object within a given area
- *  @param {Vector2} [pos]                 - Center of test area
- *  @param {Number} [size]                 - Radius of circle if float, rectangle size if Vector2
- *  @param {Function} [callbackFunction]   - Calls this function on every object that passes the test
+/** Collects all object within a given area
+ *  @param {Vector2} [pos]                 - Center of test area, or undefined for all objects
+ *  @param {Number|Vector2} [size]         - Radius of circle if float, rectangle size if Vector2
  *  @param {Array} [objects=engineObjects] - List of objects to check
+ *  @return {Array}                        - List of collected objects
  *  @memberof Engine */
-function engineObjectsCallback(pos, size, callbackFunction, objects=engineObjects)
+function engineObjectsCollect(pos, size, objects=engineObjects)
 {
+    const collectedObjects = [];
     if (!pos) // all objects
     {
         for (const o of objects)
-            callbackFunction(o);
+            collectedObjects.push(o);
     }
-    else if (size.x != undefined)  // bounding box test
+    else if (size instanceof Vector2)  // bounding box test
     {
         for (const o of objects)
-            isOverlapping(pos, size, o.pos, o.size) && callbackFunction(o);
+            isOverlapping(pos, size, o.pos, o.size) && collectedObjects.push(o);
     }
     else  // circle test
     {
         const sizeSquared = size*size;
         for (const o of objects)
-            pos.distanceSquared(o.pos) < sizeSquared && callbackFunction(o);
+            pos.distanceSquared(o.pos) < sizeSquared && collectedObjects.push(o);
     }
+    return collectedObjects;
+}
+
+/** Triggers a callback for each object within a given area
+ *  @param {Vector2} [pos]                 - Center of test area, or undefined for all objects
+ *  @param {Number|Vector2} [size]         - Radius of circle if float, rectangle size if Vector2
+ *  @param {Function} [callbackFunction]   - Calls this function on every object that passes the test
+ *  @param {Array} [objects=engineObjects] - List of objects to check
+ *  @memberof Engine */
+function engineObjectsCallback(pos, size, callbackFunction, objects=engineObjects)
+{ engineObjectsCollect(pos, size, objects).forEach(o => callbackFunction(o)); }
+
+/** Return a list of objects intersecting a ray
+ *  @param {Vector2} start
+ *  @param {Vector2} end
+ *  @param {Array} [objects=engineObjects] - List of objects to check
+ *  @return {Array} - List of objects hit
+ *  @memberof Engine */
+function engineObjectsRaycast(start, end, objects=engineObjects)
+{
+    const hitObjects = [];
+    for (const o of objects)
+    {
+        if (o.collideRaycast && isIntersecting(start, end, o.pos, o.size))
+        {
+            debugRaycast && debugRect(o.pos, o.size, '#f00');
+            hitObjects.push(o);
+        }
+    }
+
+    debugRaycast && debugLine(start, end, hitObjects.length ? '#f00' : '#00f', .02);
+    return hitObjects;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LittleJS splash screen and logo
+
+function drawEngineSplashScreen(t)
+{
+    const x = overlayContext;
+    const w = overlayCanvas.width = innerWidth;
+    const h = overlayCanvas.height = innerHeight;
+
+    {
+        // background
+        const p3 = percent(t, 1, .8);
+        const p4 = percent(t, 0, .5);
+        const g = x.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.hypot(w,h)*.7);
+        g.addColorStop(0,hsl(0,0,lerp(p4,0,p3/2),p3).toString());
+        g.addColorStop(1,hsl(0,0,0,p3).toString());
+        x.save();
+        x.fillStyle = g;
+        x.fillRect(0,0,w,h);
+    }
+
+    // draw LittleJS logo...
+    const rect = (X, Y, W, H, C)=>
+    {
+        x.beginPath();
+        x.rect(X,Y,W,C?H*p:H);
+        x.fillStyle = C;
+        C ? x.fill() : x.stroke();
+    };
+    const line = (X, Y, Z, W)=>
+    {
+        x.beginPath();
+        x.lineTo(X,Y);
+        x.lineTo(Z,W);
+        x.stroke();
+    };
+    const circle = (X, Y, R, A=0, B=2*PI, C, F)=>
+    {
+        const D = (A+B)/2, E = p*(B-A)/2;
+        x.beginPath();
+        F && x.lineTo(X,Y);
+        x.arc(X,Y,R,D-E,D+E);
+        x.fillStyle = C;
+        C ? x.fill() : x.stroke();
+    };
+    const color = (c=0, l=0) =>
+        hsl([.98,.3,.57,.14][c%4]-10,.8,[0,.3,.5,.8,.9][l]).toString();
+    const alpha = wave(1,1,t);
+    const p = percent(alpha, .1, .5);
+
+    // setup
+    x.translate(w/2,h/2);
+    const size = min(6, min(w,h)/99); // fit to screen
+    x.scale(size,size);
+    x.translate(-40,-35);
+    x.lineJoin = x.lineCap = 'round';
+    x.lineWidth = .1 + p*1.9;
+
+    // drawing effect
+    const p2 = percent(alpha,.1,1);
+    x.setLineDash([99*p2,99]);
+
+    // cab top
+    rect(7,17,18,-8,color(2,2));
+    rect(7,9,18,4,color(2,3));
+    rect(25,9,8,8,color(2,1));
+    rect(25,9,-18,8);
+    rect(25,9,8,8);
+
+    // cab
+    rect(25,17,7,22,color());
+    rect(11,40,14,-23,color(1,1));
+    rect(11,17,14,17,color(1,2));
+    rect(11,17,14,9,color(1,3));
+    rect(15,31,6,-9,color(2,2));
+    circle(15,23,5,0,PI/2,color(2,4),1);
+    rect(25,17,-14,23);
+    rect(21,22,-6,9);
+
+    // little stack
+    rect(37,14,9,6,color(3,2));
+    rect(37,14,4.5,6,color(3,3));
+    rect(37,14,9,6);
+
+    // big stack
+    rect(50,20,10,-8,color(0,1))
+    rect(50,20,6.5,-8,color(0,2))
+    rect(50,20,3.5,-8,color(0,3))
+    rect(50,20,10,-8)
+    circle(55,2,11.4,.5,PI-.5,color(3,3))
+    circle(55,2,11.4,.5,PI/2,color(3,2),1)
+    circle(55,2,11.4,.5,PI-.5)
+    rect(45,7,20,-7,color(0,2))
+    rect(45,-1,20,4,color(0,3))
+    rect(45,-1,20,8)
+
+    // engine
+    for (let i=5; i--;)
+    {
+        // stagger radius to fix slight seam
+        circle(60-i*6,30, 9.9,0,2*PI,color(i+2,3));
+        circle(60-i*6,30,10.0,-.5,PI+.5,color(i+2,2));
+        circle(60-i*6,30,10.1,.5,PI-.5,color(i+2,1));
+    }
+
+    // engine outline
+    circle(36,30,10,PI/2,PI*3/2);
+    circle(48,30,10,PI/2,PI*3/2);
+    circle(60,30,10);
+    line(36,20,60,20);
+
+    // engine front light
+    circle(60,30,4,PI,3*PI,color(3,2)); 
+    circle(60,30,4,PI,2*PI,color(3,3));
+    circle(60,30,4,PI,3*PI);
+
+    // front brush
+    for (let i=6; i--;)
+    {
+        x.beginPath();
+        x.lineTo(53,54);
+        x.lineTo(53,40);
+        x.lineTo(53+(1+i*2.9)*p,40);
+        x.lineTo(53+(4+i*3.5)*p,54);
+        x.fillStyle = color(0,i%2+2);
+        x.fill();
+        i%2 && x.stroke();
+    }
+
+    // wheels
+    rect(6,40,5,5);
+    rect(6,40,5,5,color());
+    rect(15,54,38,-14,color());
+    for (let i=3; i--;)
+    for (let j=2; j--;)
+    {
+        circle(15*i+15,47,j?7:1,PI,3*PI,color(i,3));
+        x.stroke();
+        circle(15*i+15,47,j?7:1,0,PI,color(i,2));
+        x.stroke();
+    }
+    line(6,40,68,40); // center
+    line(77,54,4,54); // bottom
+
+    // draw engine name
+    const s = engineName;
+    x.font = '900 16px arial';
+    x.textAlign = 'center';
+    x.textBaseline = 'top';
+    x.lineWidth = .1+p*3.9;
+    let w2 = 0;
+    for (let i=0; i<s.length; ++i)
+        w2 += x.measureText(s[i]).width;
+    for (let j=2; j--;)
+    for (let i=0, X=41-w2/2; i<s.length; ++i)
+    {
+        x.fillStyle = color(i,2);
+        const w = x.measureText(s[i]).width;
+        x[j?'strokeText':'fillText'](s[i],X+w/2,55.5,17*p);
+        X += w;
+    }
+    
+    x.restore();
 }

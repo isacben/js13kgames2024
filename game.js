@@ -114,7 +114,7 @@ function gameUpdate() {
     switch (state) {
         case "title":
             titleScene();
-            if (keyWasPressed(13)) {
+            if (keyWasPressed("Enter")) {
                 hideButtons(true);
                 state = "play";
             }

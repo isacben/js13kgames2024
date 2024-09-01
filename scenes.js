@@ -24,7 +24,7 @@ function titleScene() {
 }
 
 function playScene() {
-    if (/*mouseWasPressed(0) || */keyWasPressed(32)) {
+    if (/*mouseWasPressed(0) || */keyWasPressed("Space")) {
         fire();
     }
 
