@@ -8,8 +8,11 @@ function titleScene() {
     }
 
     if (titleTimer.elapsed()) {
-        titleLetter = "UNBLOCK".charAt(randInt(0,7));
+        const pos = randInt(0,7);
+        titleLetter = "UNBLOCK".charAt(pos);
         titleTimer.set(rand(.7, 2));
+
+        if (!isMuted) sound_letter.play(vec2(pos*4, 30));
     }
     printTitle();
     

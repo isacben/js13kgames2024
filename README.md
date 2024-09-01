@@ -6,11 +6,12 @@
 - [x] title screen design
 - [ ] menu
     - [x] button class
-    - [ ] start
+    - [x] start
     - [ ] pause
     - [ ] difficulty 
-    - [ ] music on/off
+    - [x] music on/off
     - [ ] credits
+    - [ ] leader board
 - [ ] levels
     - [ ] spawn blocks faster
     - [ ] one block falls
