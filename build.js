@@ -102,9 +102,10 @@ function htmlBuildStep(filename)
 
     // create html file
     let buffer = '';
-    buffer += '<html><body><script>';
+    buffer += '<body>';
+    buffer += '<script>';
     buffer += fs.readFileSync(filename);
-    buffer += '</script></body></html>';
+    buffer += '</script>';
 
     // output html file
     fs.writeFileSync(`${BUILD_FOLDER}/index.html`, buffer, {flag: 'w+'});
