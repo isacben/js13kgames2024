@@ -29,6 +29,7 @@
     - [ ] all blocks become 13
 - [ ] sound effects
 - [ ] music
+- [x] build pipeline and ECT tool installation: https://github.com/fhanau/Efficient-Compression-Tool
 
 ### Done
 

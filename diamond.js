@@ -40,6 +40,7 @@ class Diamond extends EngineObject
     collideWithObject(o) {
         if (o === player){
             this.destroy();
+            if (!isMuted) sound_pickup.play(this.pos);
 
             if (this.type === "hard")
                 hardBullets += this.amount;

@@ -17,9 +17,10 @@ const textColor = playerColor;
 // Sound effects
 const sound_shot = new Sound([.5,,432,.02,.01,.07,1,.3,-4,-2,,,,,,.2,.01,.93,.17,,-1390]);
 const sound_button = new Sound([2.5,,113,.03,.02,.008,1,2.1,,7,141,.13,,,,.4,,.67,.02,.05,-1492]);
-const sound_hit = new Sound([2.1,,79,.01,.03,.06,1,3.7,,,,,,.4,,,.15,.6,.04,,-2355]);
-const sound_destroy = new Sound([1.8,,66,.09,.05,.36,1,2.7,,,,,,2,,.2,.09,.43,.21]);
+const sound_hit = new Sound([2.1,,250,.01,.07,,1,3.5,-4,,,,,1.3,18,.3,.13,.65]);
+const sound_destroy = new Sound([.7,,45,.01,.06,.39,,1.7,4,-4,,,,2,,.6,,.44,.13,,-2517]);
 const sound_letter = new Sound([1.2,,924,.03,.04,.004,1,2.4,,,403,.06,.01,,,,.01,.56,.02,.28,335]);
+const sound_pickup = new Sound([,,306,.03,.08,.06,1,.7,,,258,.04,.04,,,.1,,.89,.04,,258]);
 
 const gameTitle = {
     'U': [
