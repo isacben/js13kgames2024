@@ -6,20 +6,20 @@
 
 'use strict';
 
-const PROGRAM_NAME = 'game';
+const PROGRAM_NAME = 'js13k2024';
 const BUILD_FOLDER = 'build';
 const sourceFiles =
 [
     './engine/littlejs.release.js',
-    'game.js',
-    'block.js',
-    'bullet.js',
-    'button.js',
-    'diamond.js',
-    'player.js',
-    'scenes.js',
-    'utilities.js',
-    'wall.js'
+    './block.js',
+    './bullet.js',
+    './button.js',
+    './diamond.js',
+    './player.js',
+    './scenes.js',
+    './utilities.js',
+    './wall.js',
+    './game.js'
 ];
 const dataFiles =
 [
@@ -102,9 +102,9 @@ function htmlBuildStep(filename)
 
     // create html file
     let buffer = '';
-    buffer += '<script>';
+    buffer += '<html><body><script>';
     buffer += fs.readFileSync(filename);
-    buffer += '</script>';
+    buffer += '</script></body></html>';
 
     // output html file
     fs.writeFileSync(`${BUILD_FOLDER}/index.html`, buffer, {flag: 'w+'});
@@ -113,7 +113,7 @@ function htmlBuildStep(filename)
 function zipBuildStep(filename)
 {
     console.log(`Zipping...`);
-    const ect = '../../../node_modules/ect-bin/vendor/win32/ect.exe';
+    const ect = '../../Efficient-Compression-Tool/build/ect';
     const args = ['-9', '-strip', '-zip', `../${PROGRAM_NAME}.zip`, 'index.html', ...dataFiles];
     child_process.spawnSync(ect, args, {stdio: 'inherit', cwd: BUILD_FOLDER});
 };
