@@ -50,28 +50,33 @@ class Block extends EngineObject
             // this is how we calculate the column
             //lines[(this.pos.x - blockSize/2) / blockSize]--;
 
-            const index = level[this.levelCol].indexOf(this);
-            if (index > -1) { // only splice array when item is found
-                level[this.levelCol].splice(index, 1); // 2nd parameter means remove one item only
-            }
-
             this.destroy();
-
-            // create explosion effect
-            const color = blockColor;
-            new ParticleEmitter(
-                this.pos, 0,            // pos, angle
-                this.size, .1, 200, PI, // emitSize, emitTime, emitRate, emiteCone
-                0,                      // tileInfo
-                color, color,                       // colorStartA, colorStartB
-                color.scale(1,0), color.scale(1,0), // colorEndA, colorEndB
-                .2, .5, 1, .08, .1,  // time, sizeStart, sizeEnd, speed, angleSpeed
-                .99, .95, .4, PI,   // damp, angleDamp, gravity, cone
-                .1, .8, 0, 1        // fade, randomness, collide, additive
-            );
-            
-            if (!isMuted) sound_destroy.play(this.pos);
         }
         return 1;
+    }
+
+    destroy() {
+        const index = level[this.levelCol].indexOf(this);
+        if (index > -1) { // only splice array when item is found
+            level[this.levelCol].splice(index, 1); // 2nd parameter means remove one item only
+        }
+
+        super.destroy();
+        destroyedBlocks++;
+
+        // create explosion effect
+        const color = blockColor;
+        new ParticleEmitter(
+            this.pos, 0,            // pos, angle
+            this.size, .1, 200, PI, // emitSize, emitTime, emitRate, emiteCone
+            0,                      // tileInfo
+            color, color,                       // colorStartA, colorStartB
+            color.scale(1,0), color.scale(1,0), // colorEndA, colorEndB
+            .2, .5, 1, .08, .1,  // time, sizeStart, sizeEnd, speed, angleSpeed
+            .99, .95, .4, PI,   // damp, angleDamp, gravity, cone
+            .1, .8, 0, 1        // fade, randomness, collide, additive
+        );
+        
+        if (!isMuted) sound_destroy.play(this.pos);
     }
 }

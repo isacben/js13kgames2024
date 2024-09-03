@@ -74,8 +74,8 @@ const gameTitle = {
     ]
 }
 
-let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer;
-let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, soundIconBtn, titleLetter, isMuted;
+let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer, stageTimer;
+let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, soundIconBtn, titleLetter, isMuted, stage, destroyedBlocks;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -91,9 +91,12 @@ function gameInit() {
     hardBulletTimer = new Timer;
     fireTimer = new Timer;
     titleTimer = new Timer;
+    stageTimer = new Timer;
 
     score = 0;
+    destroyedBlocks = 0;
     state = "title";
+    stage = 1;
     powerUp = 0;
     hardBullets = 0;
     touchStart = vec2(0,0);
@@ -115,10 +118,6 @@ function gameUpdate() {
     switch (state) {
         case "title":
             titleScene();
-            if (keyWasPressed("Enter")) {
-                hideButtons(true);
-                state = "play";
-            }
             break;
         case "play":
             playScene();
@@ -152,15 +151,14 @@ function gameRenderPost() {
             titleScene();
             break;
         case "play":
-            drawTile(vec2(1,38.5),vec2(1.2),tile(2), extraColor);
-            drawTextScreen("x " + hardBullets, vec2(130, 45), 40, playerColor);
-            drawTextScreen(
-                score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
-                vec2(mainCanvasSize.x - 55, 48),
-                50, playerColor,
-                undefined, undefined,
-                "right"
-            );
+            showInfo();
+            break;
+        case "lost":
+            showInfo();
+            break;
+        case "stage":
+            showInfo();
+            showStage();
             break;
     }
 }

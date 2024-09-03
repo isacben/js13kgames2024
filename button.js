@@ -41,11 +41,8 @@ class Click extends EngineObject
     }
     
     collideWithObject(o) {
-        if (o === playBtn) {
-            hideButtons(true);
-            if (!isMuted) sound_button.play();
-            state = "play";
-        }
+        if (o === playBtn)
+            startGame();
 
         if (o === soundBtn || o === soundIconBtn) {
             isMuted = !isMuted;

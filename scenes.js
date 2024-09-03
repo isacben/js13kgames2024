@@ -3,18 +3,11 @@
 function titleScene() {
     //drawTextScreen("UNBLOCK", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
 
-    if (!titleTimer.isSet()) {
-            titleTimer.set(.5);
-    }
-
-    if (titleTimer.elapsed()) {
-        const pos = randInt(0,7);
-        titleLetter = "UNBLOCK".charAt(pos);
-        titleTimer.set(rand(.7, 2));
-
-        if (!isMuted) sound_letter.play(vec2(pos*4, 30));
-    }
     printTitle();
+            
+    if (keyWasPressed("Enter")) {
+        startGame();
+    }
     
     if (mouseWasPressed(0)) {
         new Click(mousePos);
@@ -24,14 +17,11 @@ function titleScene() {
 }
 
 function playScene() {
-    if (/*mouseWasPressed(0) || */keyWasPressed("Space")) {
+    if (keyWasPressed("Space"))
         fire();
-    }
 
-    if (!fireTimer.isSet()) {
+    if (!fireTimer.isSet())
         fireTimer.set(.3);
-    }
-
 
     if (mouseWasPressed(0)) {
         touchStart = mousePos;
@@ -45,7 +35,6 @@ function playScene() {
     }
 
     if (swiped() || (!isTouchDevice && mouseWasPressed(0))) { // first condition, mobile; second condition, computer
-            //new Bullet(player.pos, vec2(0, 0.8), "hard");
             fire(true);
             touchEnd = 0;
             touchStart = 0;
@@ -59,29 +48,26 @@ function playScene() {
     if (!spawnBlockTimer.isSet()){
         spawnBlockTimer.set(1);
     }
+
     spawnBlock();
     moveBlocks();
 
     if (!diamondTimer.isSet()) {
         diamondTimer.set(2);
     }
+    
     spawnDiamond();
 
     if (!hardBulletTimer.isSet())
         hardBulletTimer.set(randInt(10,20));
 
-    // game over condition
-    for (let i=0; i<columns; i++) {
-        if (level[i].length > 12) {
-            lostTimer.set(0.1);
-            state = "lost";
-        }
-    }
-
     if (mouseWasPressed(0))
         new Click(mousePos);
 
     soundIconBtn.pos = vec2(1,1);
+
+    nextStage();
+    isGameOver();
 }
 
 function lostScene() {
@@ -99,5 +85,13 @@ function lostScene() {
     if (engineObjects.length < 7) {
         resetGame();
         state = "title";
+    }
+}
+
+function showStage() {
+    drawTextScreen("Stage " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
+    
+    if (stageTimer.elapsed()) {
+        state = "play";
     }
 }

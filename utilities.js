@@ -1,12 +1,50 @@
 'use strict';
 
+function startGame() {
+    if (!isMuted) sound_button.play();
+    hideButtons(true);
+    stageTimer.set(1.5);
+    state = "stage";
+}
+
+function isGameOver() {
+    for (let i=0; i<columns; i++) {
+        if (level[i].length > 2) {
+            lostTimer.set(0.1);
+            state = "lost";
+        }
+    }
+}
+
 function resetGame() {
     score = 0;
     powerUp = 0;
+    destroyedBlocks = 0;
+    hardBullets = 0;
     level = Array.from(Array(columns), () => []);
     hideButtons(false)
 }
 
+function nextStage() {
+    if (destroyedBlocks > 10) {
+        stage++;
+        state = "stage";
+        stageTimer.set(1.5);
+        destroyedBlocks = 0;
+    }
+}
+
+function showInfo() {
+    drawTile(vec2(1,38.5),vec2(1.2),tile(2), extraColor);
+    drawTextScreen("x " + hardBullets, vec2(130, 45), 40, playerColor);
+    drawTextScreen(
+        score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
+        vec2(mainCanvasSize.x - 55, 48),
+        50, playerColor,
+        undefined, undefined,
+        "right"
+    );
+}
 function spawnBlock() {
     if (spawnBlockTimer.elapsed()) {
         const col = randInt(0, columns);
@@ -88,6 +126,17 @@ function printTitle() {
     const posY = 30;
     const size = vec2(.65, .6)
 
+    if (!titleTimer.isSet()) {
+            titleTimer.set(.5);
+    }
+
+    if (titleTimer.elapsed()) {
+        const pos = randInt(0,7);
+        titleLetter = "UNBLOCK".charAt(pos);
+        titleTimer.set(rand(.7, 2));
+
+        if (!isMuted) sound_letter.play(vec2(pos*4, 30));
+    }
 
     let color = blockColor;
 
