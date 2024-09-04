@@ -10,6 +10,7 @@ class Block extends EngineObject
     {
         super(pos, vec2(blockSize));
         this.setCollision();
+        this.mass = 0;
         this.num = num;
         this.levelCol = levelCol;
     }

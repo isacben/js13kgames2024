@@ -2,6 +2,7 @@
 
 ### Todo
 
+- [ ] fix: click to destroy the blocks
 - [ ] cover screen
 - [x] title screen design
 - [ ] menu

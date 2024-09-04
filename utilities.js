@@ -3,7 +3,7 @@
 function startGame() {
     if (!isMuted) sound_button.play();
     hideButtons(true);
-    drawLevel();
+    drawLevel(stage);
     stageTimer.set(1.5);
     state = "stage";
 }
@@ -29,6 +29,7 @@ function resetGame() {
 function nextStage() {
     if (destroyedBlocks > 10) {
         stage++;
+        drawLevel(stage);
         state = "stage";
         stageTimer.set(1.5);
         destroyedBlocks = 0;
@@ -168,14 +169,16 @@ function printTitle() {
     }
 }
 
-function drawLevel() {
+function drawLevel(l) {
+    const currLevel = levelData[l];
+
     for (let col=0; col<columns; col++)
-    for (let row=0; row<l2.level[col].length; row++) {
+    for (let row=0; row<currLevel.level[col].length; row++) {
         const pos = level[col].length;
         const x = col * blockSize + blockSize / 2;
         const y = firstRow - pos * blockSize;
 
-        if (l2.level[col][row] === 2)
+        if (currLevel.level[col][row] === 2)
             level[col].push(new Block(vec2(x, y), 1000, col));
         else
             level[col].push(new Block(vec2(x, y), pos + 1, col));
