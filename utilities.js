@@ -3,13 +3,14 @@
 function startGame() {
     if (!isMuted) sound_button.play();
     hideButtons(true);
+    drawLevel();
     stageTimer.set(1.5);
     state = "stage";
 }
 
 function isGameOver() {
     for (let i=0; i<columns; i++) {
-        if (level[i].length > 2) {
+        if (level[i].length > 12) {
             lostTimer.set(0.1);
             state = "lost";
         }
@@ -164,5 +165,19 @@ function printTitle() {
             currY += size.x;
         }
         currX += size.x + addX;
+    }
+}
+
+function drawLevel() {
+    for (let col=0; col<columns; col++)
+    for (let row=0; row<l2.level[col].length; row++) {
+        const pos = level[col].length;
+        const x = col * blockSize + blockSize / 2;
+        const y = firstRow - pos * blockSize;
+
+        if (l2.level[col][row] === 2)
+            level[col].push(new Block(vec2(x, y), 1000, col));
+        else
+            level[col].push(new Block(vec2(x, y), pos + 1, col));
     }
 }
