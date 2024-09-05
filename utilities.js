@@ -3,7 +3,6 @@
 function startGame() {
     if (!isMuted) sound_button.play();
     hideButtons(true);
-    drawLevel(stage);
     stageTimer.set(1.5);
     state = "stage";
 }
@@ -20,6 +19,7 @@ function isGameOver() {
 function resetGame() {
     score = 0;
     powerUp = 0;
+    stage=1;
     destroyedBlocks = 0;
     hardBullets = 0;
     level = Array.from(Array(columns), () => []);
@@ -28,8 +28,22 @@ function resetGame() {
 
 function nextStage() {
     if (destroyedBlocks > 10) {
+        //level = Array.from(Array(columns), () => []);
         stage++;
-        drawLevel(stage);
+        state = "clear";
+    }
+}
+
+function clearStage() {
+    for (let col=0; col<columns; col++){
+        for (let row=0; row<level[col].length; row++) {
+            level[col][row].destroy();
+        }
+    }
+
+    //console.log(level)
+
+    if (engineObjects.length < 7) {
         state = "stage";
         stageTimer.set(1.5);
         destroyedBlocks = 0;

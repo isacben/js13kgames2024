@@ -92,6 +92,7 @@ function showStage() {
     drawTextScreen("Stage " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
     
     if (stageTimer.elapsed()) {
+        drawLevel(stage);
         state = "play";
     }
 }

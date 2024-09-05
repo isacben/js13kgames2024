@@ -122,6 +122,9 @@ function gameUpdate() {
         case "play":
             playScene();
             break;
+        case "clear":
+            clearStage();
+            break;
         case "lost":
             lostScene();
             break;
@@ -159,6 +162,9 @@ function gameRenderPost() {
         case "stage":
             showInfo();
             showStage();
+            break;
+        case "clear":
+            showInfo();
             break;
     }
 }
