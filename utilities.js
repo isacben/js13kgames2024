@@ -30,6 +30,7 @@ function nextStage() {
     if (destroyedBlocks > 10) {
         //level = Array.from(Array(columns), () => []);
         stage++;
+        stageTimer.set(1);
         state = "clear";
     }
 }
@@ -40,13 +41,10 @@ function clearStage() {
             level[col][row].destroy();
         }
     }
-
-    //console.log(level)
-
-    if (engineObjects.length < 7) {
-        state = "stage";
+    if (stageTimer.elapsed()) {
         stageTimer.set(1.5);
         destroyedBlocks = 0;
+        state = "stage";
     }
 }
 
