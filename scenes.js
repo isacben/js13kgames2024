@@ -74,8 +74,8 @@ function endScene() {
     backBtn.pos.x = cameraPos.x;
 }
 
-function endSceneText(text) {
-    drawTextScreen(text,vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, playerColor);
+function endSceneText(text, color) {
+    drawTextScreen(text,vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, color);
     drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
 }
 

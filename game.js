@@ -174,10 +174,10 @@ function gameRenderPost() {
             showInfo();
             break;
         case "win":
-            endSceneText("WELL DONE!");
+            endSceneText("WELL DONE!", playerColor);
             break;
         case "over":
-            endSceneText("GAME OVER");
+            endSceneText("GAME OVER", blockColor);
             break;
     }
 }

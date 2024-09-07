@@ -29,8 +29,8 @@
 - [ ] add gameover screen
     - [ ] enhance gameover animation
     - [ ] all blocks become 13
-    - [ ] you can see your final score
-    - [ ] there is a restart button that goes to the title screen
+    - [x] you can see your final score
+    - [x] there is a restart button that goes to the title screen
 - [x] sound effects
 - [ ] music
 - [x] build pipeline and ECT tool installation: https://github.com/fhanau/Efficient-Compression-Tool
