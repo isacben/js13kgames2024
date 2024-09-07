@@ -48,14 +48,13 @@ function playScene() {
     spawnBlock();
     moveBlocks();
 
-    if (!diamondTimer.isSet()) {
+    if (!diamondTimer.isSet())
         diamondTimer.set(2);
-    }
     
-    spawnDiamond();
-
     if (!hardBulletTimer.isSet())
         hardBulletTimer.set(randInt(10,20));
+
+    spawnDiamond();
 
     if (mouseWasPressed(0))
         new Click(mousePos);

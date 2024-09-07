@@ -119,7 +119,7 @@ function spawnDiamond() {
     if (hardBulletTimer.elapsed()) {
         const x = randInt(1,15);
         new Diamond(vec2(x, 41), 1, "hard");
-        hardBulletTimer.set(10,20);
+        hardBulletTimer.set(randInt(levelData[stage].hardBulletInterval.min, levelData[stage].hardBulletInterval.max));
     }
 }
 
