@@ -2,7 +2,7 @@
 
 ### Todo
 
-- [ ] fix: click to destroy the blocks
+- [x] fix: click to destroy the blocks
 - [x] title screen design
 - [ ] hide player in tile screen
 - [ ] menu
@@ -25,7 +25,7 @@
     - [x] spread bullets
     - [x] add power ups that enable these types of bullets
     - [ ] randomize power ups
-- [ ] clean Block class (physics code)
+- [ ] clean Block class (physics code) and all code in general
 - [ ] add gameover screen
     - [ ] enhance gameover animation
     - [ ] all blocks become 13
