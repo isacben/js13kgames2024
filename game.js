@@ -75,7 +75,7 @@ const gameTitle = {
 }
 
 let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer, stageTimer;
-let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, soundIconBtn, titleLetter, isMuted, stage, destroyedBlocks;
+let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, soundIconBtn, backBtn, titleLetter, isMuted, stage, destroyedBlocks;
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -110,6 +110,7 @@ function gameInit() {
     playBtn = new Button(cameraPos, vec2(6,2), "PLAY");
     soundBtn = new Button(vec2(cameraPos.x, cameraPos.y - 2.5), vec2(6,2), "MUTE");
     soundIconBtn = new Button(vec2(-5, 1), vec2(2,2), "♫");
+    backBtn = new Button(vec2(-5, cameraPos.y + 1.5), vec2(6,2), "MENU");
 
     // pause: ⏸ 
 }
@@ -165,6 +166,9 @@ function gameRenderPost() {
             break;
         case "clear":
             showInfo();
+            break;
+        case "win":
+            winScene();
             break;
     }
 }

@@ -52,6 +52,15 @@ class Click extends EngineObject
             if (!isMuted) sound_button.play();
         }
 
+        if (o === backBtn) {
+            backBtn.pos.x = -5;
+            hideButtons(false);
+            resetGame();
+            if (!isMuted) sound_button.play();
+            
+            state = "title";
+        }
+
         this.destroy();
         return 1; 
     }

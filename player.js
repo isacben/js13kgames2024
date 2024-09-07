@@ -19,7 +19,7 @@ class Player extends EngineObject
     update() {
         this.pos.x = lerp(0.1, this.pos.x, mousePos.x); // move paddle to mouse
         
-        // clamp balls to level size
+        // clamp player to level size
         this.pos.x = clamp(this.pos.x, this.size.x/2, levelSize.x - this.size.x/2);
     }
 }

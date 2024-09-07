@@ -3,8 +3,8 @@
 ### Todo
 
 - [ ] fix: click to destroy the blocks
-- [ ] cover screen
 - [x] title screen design
+- [ ] hide player in tile screen
 - [ ] menu
     - [x] button class
     - [x] start
@@ -19,6 +19,7 @@
     - [ ] blocks of all columns fall
     - [ ] hard block that can only be destroyed with one type of bullet
     - [ ] block that destroys adjacent blocks when it is destroyed
+- [ ] finish screen (doesn't break after last level)
 - [ ] support powerful bullets
     - [x] destroy multiple blocks
     - [x] spread bullets
@@ -28,7 +29,9 @@
 - [ ] add gameover screen
     - [ ] enhance gameover animation
     - [ ] all blocks become 13
-- [ ] sound effects
+    - [ ] you can see your final score
+    - [ ] there is a restart button that goes to the title screen
+- [x] sound effects
 - [ ] music
 - [x] build pipeline and ECT tool installation: https://github.com/fhanau/Efficient-Compression-Tool
 

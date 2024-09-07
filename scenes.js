@@ -70,6 +70,17 @@ function playScene() {
     isGameOver();
 }
 
+function winScene() {
+    if (mouseWasPressed(0))
+        new Click(mousePos);
+
+    hideButtons(true);
+    drawTextScreen("WELL DONE!", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, playerColor);
+    
+    drawTextScreen(score, vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
+    backBtn.pos.x = cameraPos.x;
+}
+
 function lostScene() {
 
     if (lostTimer.isSet()) {
@@ -89,7 +100,7 @@ function lostScene() {
 }
 
 function showStage() {
-    drawTextScreen("Stage " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
+    drawTextScreen("STAGE " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/5), 45, playerColor);
     
     if (stageTimer.elapsed()) {
         drawLevel(stage);

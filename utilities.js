@@ -30,6 +30,8 @@ function nextStage() {
     if (destroyedBlocks > 10) {
         //level = Array.from(Array(columns), () => []);
         stage++;
+
+
         stageTimer.set(1);
         state = "clear";
     }
@@ -41,10 +43,15 @@ function clearStage() {
             level[col][row].destroy();
         }
     }
+
     if (stageTimer.elapsed()) {
         stageTimer.set(1.5);
         destroyedBlocks = 0;
-        state = "stage";
+        
+        if (stage === 2)
+            state = "win";
+        else
+            state = "stage";
     }
 }
 
@@ -133,6 +140,12 @@ function hideButtons(hidden) {
         soundBtn.pos.y = cameraPos.y - 2.5;
     }
 }
+
+//function hidePlayer(hidden) {
+//    if (hidden) {
+//        player.pos = vec2(-5,-5);
+//    }
+//}
 
 function printTitle() {
     const title = "UNBLOCK";
