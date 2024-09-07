@@ -2,6 +2,8 @@
 
 ### Todo
 
+- [ ] tutorial
+- [ ] timer that shows when the stage is going to finish
 - [x] fix: click to destroy the blocks
 - [x] title screen design
 - [ ] hide player in tile screen

@@ -41,6 +41,9 @@ function playScene() {
         fireTimer.set(.2);
     }
 
+    if (!playStageTimer.isSet())
+        playStageTimer.set(levelData[stage].time);
+
     if (!spawnBlockTimer.isSet()){
         spawnBlockTimer.set(1);
     }
@@ -90,6 +93,9 @@ function lostScene() {
         }
     }
 
+    if (playStageTimer.isSet())
+        playStageTimer.unset();
+
     if (engineObjects.length < 8) {
         state = "over";
     }
@@ -100,6 +106,11 @@ function showStage() {
     
     if (stageTimer.elapsed()) {
         drawLevel(stage);
+        playStageTimer.set(levelData[stage].time);
         state = "play";
     }
+}
+
+function showProgressBar() {
+    drawRect(vec2(0 + 10*playStageTimer.getPercent(),37.3), vec2(20*playStageTimer.getPercent(), .5), bulletColor); // block color
 }

@@ -27,11 +27,9 @@ function resetGame() {
 }
 
 function nextStage() {
-    if (destroyedBlocks > 100) {
+    if (playStageTimer.elapsed()) {
         //level = Array.from(Array(columns), () => []);
         stage++;
-
-
         stageTimer.set(1);
         state = "clear";
     }

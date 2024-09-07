@@ -14,9 +14,10 @@ const levelData = {
             []
         ],
         hardBulletInterval: {
-            min: 10,
-            max: 20
-        }
+            min: 20,
+            max: 40
+        },
+        time: 30
     },
     2: {
         level: [
@@ -33,17 +34,18 @@ const levelData = {
             [1]
         ],
         hardBulletInterval: {
-            min: 10,
-            max: 20
-        }
+            min: 20,
+            max: 40
+        },
+        time: 50
     },
     3: {
         level: [
             [1,1,1],
             [1,1,1,1],
-            [1,1,1],
-            [1,1,1],
-            [1,1,1],
+            [1,1,2],
+            [1,1,2],
+            [1,1,2],
             [1,1,2,1],
             [1,1],
             [1,1,1],
@@ -54,6 +56,27 @@ const levelData = {
         hardBulletInterval: {
             min: 8,
             max: 17
-        }
+        },
+        time: 60
+    },
+    4: {
+        level: [
+            [1,1,1],
+            [1,1,1,1,1],
+            [1,1,1],
+            [1,1,1],
+            [1,1,1],
+            [1,1,2,1],
+            [1,1,1,2],
+            [1,1,1,1],
+            [1,1,2],
+            [1,2,1],
+            [1,2,1]
+        ],
+        hardBulletInterval: {
+            min: 8,
+            max: 17
+        },
+        time: 70
     }
 }
