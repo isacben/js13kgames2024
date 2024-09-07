@@ -1,10 +1,6 @@
 'use strict';
 
 function titleScene() {
-    //drawTextScreen("UNBLOCK", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50);
-
-    printTitle();
-            
     if (keyWasPressed("Enter")) {
         startGame();
     }
@@ -75,10 +71,12 @@ function winScene() {
         new Click(mousePos);
 
     hideButtons(true);
-    drawTextScreen("WELL DONE!", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, playerColor);
-    
-    drawTextScreen(score, vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
     backBtn.pos.x = cameraPos.x;
+}
+
+function winSceneText() {
+    drawTextScreen("WELL DONE!", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, playerColor);
+    drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
 }
 
 function lostScene() {
