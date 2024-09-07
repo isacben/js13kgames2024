@@ -127,7 +127,10 @@ function gameUpdate() {
             clearStage();
             break;
         case "win":
-            winScene();
+            endScene();
+            break;
+        case "over":
+            endScene();
             break;
         case "lost":
             lostScene();
@@ -171,7 +174,10 @@ function gameRenderPost() {
             showInfo();
             break;
         case "win":
-            winSceneText();
+            endSceneText("WELL DONE!");
+            break;
+        case "over":
+            endSceneText("GAME OVER");
             break;
     }
 }

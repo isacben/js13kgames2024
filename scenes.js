@@ -66,7 +66,7 @@ function playScene() {
     isGameOver();
 }
 
-function winScene() {
+function endScene() {
     if (mouseWasPressed(0))
         new Click(mousePos);
 
@@ -74,8 +74,8 @@ function winScene() {
     backBtn.pos.x = cameraPos.x;
 }
 
-function winSceneText() {
-    drawTextScreen("WELL DONE!", vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, playerColor);
+function endSceneText(text) {
+    drawTextScreen(text,vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, playerColor);
     drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
 }
 
@@ -91,9 +91,8 @@ function lostScene() {
         }
     }
 
-    if (engineObjects.length < 7) {
-        resetGame();
-        state = "title";
+    if (engineObjects.length < 8) {
+        state = "over";
     }
 }
 

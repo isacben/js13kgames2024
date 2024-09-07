@@ -19,7 +19,7 @@
     - [ ] blocks of all columns fall
     - [ ] hard block that can only be destroyed with one type of bullet
     - [ ] block that destroys adjacent blocks when it is destroyed
-- [ ] finish screen (doesn't break after last level)
+- [x] finish screen (doesn't break after last level)
 - [ ] support powerful bullets
     - [x] destroy multiple blocks
     - [x] spread bullets

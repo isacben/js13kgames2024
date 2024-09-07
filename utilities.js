@@ -9,7 +9,7 @@ function startGame() {
 
 function isGameOver() {
     for (let i=0; i<columns; i++) {
-        if (level[i].length > 12) {
+        if (level[i].length > 2) {
             lostTimer.set(0.1);
             state = "lost";
         }
