@@ -75,7 +75,10 @@ const gameTitle = {
 }
 
 let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer, stageTimer;
-let level, score, state, powerUp, hardBullets, touchStart, touchEnd, player, playBtn, soundBtn, soundIconBtn, backBtn, titleLetter, isMuted, stage, destroyedBlocks;
+let level, score, state, powerUp, hardBullets, player, titleLetter, isMuted, firstStage, stage, lastStage, maxBlocks, destroyedBlocks;
+let playBtn, soundBtn, soundIconBtn, backBtn, touchStart, touchEnd;
+
+
 
 function gameInit() {
     cameraPos = levelSize.scale(.5); // center camera in level
@@ -93,10 +96,15 @@ function gameInit() {
     titleTimer = new Timer;
     stageTimer = new Timer;
 
+    // initial configuation
+    state = "title";
+    firstStage = 3;
+    lastStage = 4;
+    maxBlocks = 12;
+    
+    stage = firstStage;
     score = 0;
     destroyedBlocks = 0;
-    state = "title";
-    stage = 1;
     powerUp = 0;
     hardBullets = 0;
     touchStart = vec2(0,0);
@@ -127,8 +135,6 @@ function gameUpdate() {
             clearStage();
             break;
         case "win":
-            endScene();
-            break;
         case "over":
             endScene();
             break;
@@ -161,17 +167,14 @@ function gameRenderPost() {
             printTitle();
             break;
         case "play":
+        case "lost":
+        case "clear":
             showInfo();
             break;
-        case "lost":
-            showInfo();
             break;
         case "stage":
             showInfo();
             showStage();
-            break;
-        case "clear":
-            showInfo();
             break;
         case "win":
             endSceneText("WELL DONE!", playerColor);

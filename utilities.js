@@ -9,7 +9,7 @@ function startGame() {
 
 function isGameOver() {
     for (let i=0; i<columns; i++) {
-        if (level[i].length > 2) {
+        if (level[i].length > maxBlocks) {
             lostTimer.set(0.1);
             state = "lost";
         }
@@ -19,7 +19,7 @@ function isGameOver() {
 function resetGame() {
     score = 0;
     powerUp = 0;
-    stage=1;
+    stage = firstStage;
     destroyedBlocks = 0;
     hardBullets = 0;
     level = Array.from(Array(columns), () => []);
@@ -27,7 +27,7 @@ function resetGame() {
 }
 
 function nextStage() {
-    if (destroyedBlocks > 10) {
+    if (destroyedBlocks > 100) {
         //level = Array.from(Array(columns), () => []);
         stage++;
 
@@ -48,7 +48,7 @@ function clearStage() {
         stageTimer.set(1.5);
         destroyedBlocks = 0;
         
-        if (stage === 2)
+        if (stage === lastStage)
             state = "win";
         else
             state = "stage";

@@ -17,8 +17,13 @@ class Block extends EngineObject
 
     render() {
         drawRect(this.pos, this.size, blockColor); // for border
-        drawRect(this.pos, vec2(blockSize*0.85,blockSize*0.85), bgColor); // block color
-        drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
+
+        if (this.num > 100) {
+            drawRect(this.pos, vec2(blockSize*0.85,blockSize*0.85), blockColor); // block color
+        } else {
+            drawRect(this.pos, vec2(blockSize*0.85,blockSize*0.85), bgColor); // block color
+            drawText(this.num, vec2(this.pos.x, this.pos.y - 0.1), blockSize * 0.7, textColor); // block number
+        }
     }
 
     collideWithObject(o) {
