@@ -1,6 +1,8 @@
 'use strict';
 
 function titleScene() {
+    fireControl();
+
     if (keyWasPressed("Enter")) {
         startGame();
     }
@@ -13,33 +15,7 @@ function titleScene() {
 }
 
 function playScene() {
-    if (keyWasPressed("Space"))
-        fire();
-
-    if (!fireTimer.isSet())
-        fireTimer.set(.3);
-
-    if (mouseWasPressed(0)) {
-        touchStart = mousePos;
-        touchEnd = touchStart;
-        fireTimer.set(.1); // prevent double shoot when swipping
-        swipeTimer.set(.2);
-    }
-
-    if (mouseWasReleased(0)) {
-        touchEnd = mousePos;
-    }
-
-    if (swiped() || (!isTouchDevice && mouseWasPressed(0))) { // first condition, mobile; second condition, computer
-            fire(true);
-            touchEnd = 0;
-            touchStart = 0;
-    }
-
-    if (fireTimer.elapsed() && mouseIsDown(0) && isTouchDevice) {
-        fire();
-        fireTimer.set(.2);
-    }
+   fireControl(); 
 
     if (!playStageTimer.isSet())
         playStageTimer.set(levelData[stage].time);

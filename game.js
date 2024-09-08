@@ -100,14 +100,14 @@ function gameInit() {
     // initial configuation
     state = "title";
     firstStage = 1;
-    lastStage = 5;
-    maxBlocks = 12;
+    lastStage = 2;
+    maxBlocks = 2;
     
     stage = firstStage;
     score = 0;
     destroyedBlocks = 0;
     powerUp = 0;
-    hardBullets = 0;
+    hardBullets = 10;
     touchStart = vec2(0,0);
     touchEnd = vec2(0,0);
     titleLetter = "B";
@@ -116,10 +116,10 @@ function gameInit() {
     player = new Player(playerInit);
     new Wall(vec2(-.5,0), vec2(1,80)) // left
     new Wall(vec2(levelSize.x+.5,levelSize.y), vec2(1,80)) // right
-    playBtn = new Button(cameraPos, vec2(6,2), "PLAY");
-    soundBtn = new Button(vec2(cameraPos.x, cameraPos.y - 2.5), vec2(6,2), "MUTE");
+    playBtn = new Button(vec2(cameraPos.x, cameraPos.y + 2.5), vec2(6,2), "PLAY");
+    soundBtn = new Button(cameraPos, vec2(6,2), "MUTE");
     soundIconBtn = new Button(vec2(-5, 1), vec2(2,2), "♫");
-    backBtn = new Button(vec2(-5, cameraPos.y), vec2(6,2), "MENU");
+    backBtn = new Button(vec2(-5, cameraPos.y + 2.5), vec2(6,2), "MENU");
 
     // pause: ⏸ 
 }
@@ -165,6 +165,7 @@ function gameRenderPost() {
     // draw effects or hud that appear above all objects
     switch (state) {
         case "title":
+            tutorial();
             printTitle();
             break;
         case "play":

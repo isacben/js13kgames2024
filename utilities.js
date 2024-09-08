@@ -1,6 +1,8 @@
 'use strict';
 
 function startGame() {
+    hardBullets = 0;
+
     if (!isMuted) sound_button.play();
     hideButtons(true);
     stageTimer.set(1.5);
@@ -21,7 +23,7 @@ function resetGame() {
     powerUp = 0;
     stage = firstStage;
     destroyedBlocks = 0;
-    hardBullets = 0;
+    hardBullets = 10;
     level = Array.from(Array(columns), () => []);
     hideButtons(false)
 }
@@ -55,7 +57,7 @@ function clearStage() {
 
 function showInfo() {
     drawTile(vec2(1,38.5),vec2(1.2),tile(2), extraColor);
-    drawTextScreen("x " + hardBullets, vec2(130, 45), 40, playerColor);
+    drawTextScreen("x " + hardBullets, vec2(100, 45), 40, playerColor, undefined, undefined, "left");
     drawTextScreen(
         score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
         vec2(mainCanvasSize.x - 55, 48),
@@ -130,12 +132,11 @@ function swiped() {
 
 function hideButtons(hidden) {
     if (hidden) {
-        playBtn.pos = vec2(-5, -5);
-        soundBtn.pos = vec2(-5, -5);
+        playBtn.pos.x = -5;
+        soundBtn.pos.x = -5;
     } else {
-        playBtn.pos = cameraPos;
+        playBtn.pos.x = cameraPos.x;
         soundBtn.pos.x = cameraPos.x;
-        soundBtn.pos.y = cameraPos.y - 2.5;
     }
 }
 
@@ -192,6 +193,25 @@ function printTitle() {
     }
 }
 
+function tutorial() {
+    const posX = mainCanvasSize.x/2;
+    const posY = mainCanvasSize.y/2;
+    const fontSize = 32;
+    drawTile(vec2(cameraPos.x-1, cameraPos.y - 7.5), vec2(1.2), tile(2), extraColor);
+    drawTextScreen("x " + hardBullets, vec2(posX, posY + 240), fontSize, playerColor, undefined, undefined, "left");
+    
+    let shootText = "PRESS SPACE";
+    let hardBulletText = "PRESS LEFT CLICK";
+
+    if (isTouchDevice) {
+        shootText = "TOUCH THE SCREEN";
+        hardBulletText = "SWIPE UP";
+    }
+    
+    drawTextScreen(shootText, vec2(mainCanvasSize.x/2, mainCanvasSize.y/2 + 130), fontSize, playerColor);
+    drawTextScreen(hardBulletText, vec2(mainCanvasSize.x/2, mainCanvasSize.y/2 + 185), fontSize, playerColor);
+}
+
 function drawLevel(l) {
     const currLevel = levelData[l];
 
@@ -205,5 +225,35 @@ function drawLevel(l) {
             level[col].push(new Block(vec2(x, y), 1000, col));
         else
             level[col].push(new Block(vec2(x, y), pos + 1, col));
+    }
+}
+
+function fireControl() {
+    if (keyWasPressed("Space"))
+        fire();
+
+    if (!fireTimer.isSet())
+        fireTimer.set(.3);
+
+    if (mouseWasPressed(0)) {
+        touchStart = mousePos;
+        touchEnd = touchStart;
+        fireTimer.set(.1); // prevent double shoot when swipping
+        swipeTimer.set(.2);
+    }
+
+    if (mouseWasReleased(0)) {
+        touchEnd = mousePos;
+    }
+
+    if (swiped() || (!isTouchDevice && mouseWasPressed(0))) { // first condition, mobile; second condition, computer
+            fire(true);
+            touchEnd = 0;
+            touchStart = 0;
+    }
+
+    if (fireTimer.elapsed() && mouseIsDown(0) && isTouchDevice) {
+        fire();
+        fireTimer.set(.2);
     }
 }
