@@ -12,10 +12,13 @@ function titleScene() {
     }
     
     soundIconBtn.pos = vec2(-5,1);
+    soundBtn.label = isMuted ? "UNMUTE" : "MUTE";
 }
 
 function playScene() {
-   fireControl(); 
+    if (!isMuted && !song1.playing()) song1.play();
+    
+    fireControl(); 
 
     if (!playStageTimer.isSet())
         playStageTimer.set(levelData[stage].time);
@@ -30,15 +33,16 @@ function playScene() {
     if (!diamondTimer.isSet())
         diamondTimer.set(2);
     
-    if (!hardBulletTimer.isSet())
-        hardBulletTimer.set(randInt(10,20));
-
     spawnDiamond();
+    if (!hardBulletTimer.isSet())
+        hardBulletTimer.set(5);
+
 
     if (mouseWasPressed(0))
         new Click(mousePos);
 
     soundIconBtn.pos = vec2(1,1);
+    soundIconBtn.label = isMuted ? " ̶♫̶" : "♫";
 
     nextStage();
     isGameOver();
@@ -57,14 +61,14 @@ function endSceneText(text, color) {
     drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
 }
 
-function lostScene() {
-
+function lostScene() {  
+    song1.stop();
     if (lostTimer.isSet()) {
         if (lostTimer.elapsed()) {
             let o = randInt(0, engineObjects.length);
             if (engineObjects[o].constructor.name === "Block") {
                 engineObjects[o].destroy();
-                lostTimer.set(0.1);
+                lostTimer.set(0.001);
             }
         }
     }

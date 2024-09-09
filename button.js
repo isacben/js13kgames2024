@@ -44,12 +44,15 @@ class Click extends EngineObject
         if (o === playBtn)
             startGame();
 
-        if (o === soundBtn || o === soundIconBtn) {
+        if (o === soundBtn) {
             isMuted = !isMuted;
-            soundBtn.label = isMuted ? "UNMUTE" : "MUTE";
-            soundIconBtn.label = isMuted ? " ̶♫̶" : "♫";
-
             if (!isMuted) sound_button.play();
+        }
+
+        if (o === soundIconBtn) {
+            isMuted = !isMuted;
+            if (!isMuted) sound_button.play();
+            isMuted ? song1.stop() : song1.play();
         }
 
         if (o === backBtn) {

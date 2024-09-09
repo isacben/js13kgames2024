@@ -78,6 +78,8 @@ let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireT
 let level, score, state, powerUp, hardBullets, player, titleLetter, isMuted, firstStage, stage, lastStage, maxBlocks, destroyedBlocks;
 let playBtn, soundBtn, soundIconBtn, backBtn, touchStart, touchEnd;
 
+const song1 = new MusicPlayer([[[,0,232,.01,.09,.15,2,,,,,,154.87,,,,.26],[2,0,4e3,,,.03,2,1.25,,,,,.02,6.8,-.3,,.5],[.7,0,22,,.07,.07,2,0,,,.5,.01]],[[[,-1,10,,10,,10,,10,,10,,10,,10,,10,,8,,8,,8,,8,,8,,8,,8,,8,,7,,7,,7,,7,,7,,7,,7,,7,,6,,6,,6,,6,,6,,6,,6,,6,,],[1,1,,,,,10,,,,,,,,10,,10,,,,,,8,,,,,,,,8,,8,,,,,,7,,,,,,,,7,,7,,,,,,6,,,,,,,,6,,6,,],[2,1,10,,,,,,10,,,,,,,,10,,8,,,,,,8,,,,,,,,8,,7,,,,,,7,,,,,,,,7,,6,,,,,,6,,,,,,,,6,,],[,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,]]],[0],,{"title":"New Song","instruments":["Hall Brass","Hihat","Korg Bass"],"patterns":["Pattern 0"]}]);
+
 
 
 function gameInit() {
@@ -99,9 +101,9 @@ function gameInit() {
 
     // initial configuation
     state = "title";
-    firstStage = 1;
-    lastStage = 2;
-    maxBlocks = 2;
+    firstStage = 5;
+    lastStage = 6;
+    maxBlocks = 12;
     
     stage = firstStage;
     score = 0;

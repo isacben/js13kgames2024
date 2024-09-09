@@ -1,0 +1,27 @@
+'use strict';
+
+class MusicPlayer extends Music
+{
+    constructor(zzfxMusic) {
+        super(zzfxMusic);
+        this.isPlaying = false;
+    }
+
+    play() {
+        if (!this.isPlaying) {
+            super.playMusic(1, true);
+            this.isPlaying = true;
+        }
+    }
+
+    stop() {
+        if (this.isPlaying) {
+            this.isPlaying = false;
+            super.stop();
+        }
+    }
+
+    playing() {
+        return this.isPlaying;
+    }
+}
