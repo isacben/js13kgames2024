@@ -103,7 +103,7 @@ function gameInit() {
     state = "title";
     firstStage = 5;
     lastStage = 6;
-    maxBlocks = 12;
+    maxBlocks = 6;
     
     stage = firstStage;
     score = 0;

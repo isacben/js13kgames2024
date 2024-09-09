@@ -13,6 +13,7 @@ function isGameOver() {
     for (let i=0; i<columns; i++) {
         if (level[i].length > maxBlocks) {
             lostTimer.set(0.1);
+            song1.stop();
             state = "lost";
         }
     }
