@@ -15,8 +15,11 @@ function titleScene() {
     soundBtn.label = isMuted ? "UNMUTE" : "MUTE";
 }
 
-function playScene() {
+function playMainTheme() {
     if (!isMuted && !song.playing()) song.play();
+}
+
+function playScene() {
     
     fireControl(); 
 
@@ -60,10 +63,11 @@ function endScene() {
 function endSceneText(text, color) {
     drawTextScreen(text,vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, color);
     drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
+
+    if (song.isPlaying) song.stop();
 }
 
 function lostScene() {  
-    song.stop();
     if (lostTimer.isSet()) {
         if (lostTimer.elapsed()) {
             let o = randInt(0, engineObjects.length);

@@ -22,6 +22,8 @@ const sound_hit = new Sound([2.1,,250,.01,.07,,1,3.5,-4,,,,,1.3,18,.3,.13,.65]);
 const sound_destroy = new Sound([.7,,45,.01,.06,.39,,1.7,4,-4,,,,2,,.6,,.44,.13,,-2517]);
 const sound_letter = new Sound([1.2,,924,.03,.04,.004,1,2.4,,,403,.06,.01,,,,.01,.56,.02,.28,335]);
 const sound_pickup = new Sound([,,306,.03,.08,.06,1,.7,,,258,.04,.04,,,.1,,.89,.04,,258]);
+const gameover_sound = new Sound([,,570,.08,.26,.16,,1.2,,,-99,.09,.09,,,,,.7,.22,.45]);
+const stage_sound = new Sound([1.9,,485,.03,.14,.4,1,,9,16,-117,.09,.05,,,,.16,.6,.14]);
 
 const gameTitle = {
     'U': [
@@ -135,9 +137,14 @@ function gameUpdate() {
             break;
         case "play":
             playScene();
+            playMainTheme();
             break;
         case "clear":
             clearStage();
+            playMainTheme();
+            break;
+        case "stage":
+            playMainTheme();
             break;
         case "win":
         case "over":

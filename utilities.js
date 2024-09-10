@@ -32,6 +32,7 @@ function resetGame() {
 function nextStage() {
     if (playStageTimer.elapsed()) {
         //level = Array.from(Array(columns), () => []);
+
         stage++;
         stageTimer.set(1);
         state = "clear";
@@ -49,12 +50,14 @@ function clearStage() {
         stageTimer.set(1.5);
         destroyedBlocks = 0;
     
-        song.stop();
         
-        if (stage === lastStage)
+        if (stage === lastStage) {
             state = "win";
-        else
+        }
+        else {
+            if (!isMuted) stage_sound.play();
             state = "stage";
+        }
     }
 }
 
