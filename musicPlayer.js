@@ -16,8 +16,8 @@ class MusicPlayer extends Music
 
     stop() {
         if (this.isPlaying) {
-            this.isPlaying = false;
             super.stop();
+            this.isPlaying = false;
         }
     }
 

@@ -15,6 +15,7 @@ const extraColor = new Color(0.568, 0.003, 0.968);
 const textColor = playerColor;
 
 // Sound effects
+const deaf_sound = new Sound([0]);
 const sound_shot = new Sound([.5,,432,.02,.01,.07,1,.3,-4,-2,,,,,,.2,.01,.93,.17,,-1390]);
 const sound_button = new Sound([2.5,,113,.03,.02,.008,1,2.1,,7,141,.13,,,,.4,,.67,.02,.05,-1492]);
 const sound_hit = new Sound([2.1,,250,.01,.07,,1,3.5,-4,,,,,1.3,18,.3,.13,.65]);
@@ -101,8 +102,8 @@ function gameInit() {
 
     // initial configuation
     state = "title";
-    firstStage = 5;
-    lastStage = 6;
+    firstStage = 1;
+    lastStage = 2;
     maxBlocks = 12;
     
     stage = firstStage;
@@ -124,6 +125,7 @@ function gameInit() {
     backBtn = new Button(vec2(-5, cameraPos.y + 2.5), vec2(6,2), "MENU");
 
     // pause: ⏸ 
+    deaf_sound.play(); // artificially resume AudioContext
 }
 
 function gameUpdate() {

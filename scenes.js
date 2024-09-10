@@ -53,6 +53,7 @@ function endScene() {
         new Click(mousePos);
 
     hideButtons(true);
+    soundIconBtn.pos.x = -5;
     backBtn.pos.x = cameraPos.x;
 }
 

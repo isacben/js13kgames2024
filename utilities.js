@@ -48,6 +48,8 @@ function clearStage() {
     if (stageTimer.elapsed()) {
         stageTimer.set(1.5);
         destroyedBlocks = 0;
+    
+        song1.stop();
         
         if (stage === lastStage)
             state = "win";

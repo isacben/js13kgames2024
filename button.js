@@ -46,6 +46,7 @@ class Click extends EngineObject
 
         if (o === soundBtn) {
             isMuted = !isMuted;
+            deaf_sound.play();
             if (!isMuted) sound_button.play();
         }
 
