@@ -105,7 +105,7 @@ function gameInit() {
     // initial configuation
     state = "title";
     firstStage = 1;
-    lastStage = 2;
+    lastStage = 3;
     maxBlocks = 12;
     
     stage = firstStage;
@@ -141,7 +141,6 @@ function gameUpdate() {
             break;
         case "clear":
             clearStage();
-            playMainTheme();
             break;
         case "stage":
             playMainTheme();
@@ -184,7 +183,6 @@ function gameRenderPost() {
         case "clear":
             showInfo();
             showProgressBar();
-            break;
             break;
         case "stage":
             showInfo();

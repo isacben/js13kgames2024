@@ -58,13 +58,13 @@ function endScene() {
     hideButtons(true);
     soundIconBtn.pos.x = -5;
     backBtn.pos.x = cameraPos.x;
+
+    if (song.isPlaying) song.stop();
 }
 
 function endSceneText(text, color) {
     drawTextScreen(text,vec2(mainCanvasSize.x/2, mainCanvasSize.y/4), 50, color);
     drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
-
-    if (song.isPlaying) song.stop();
 }
 
 function lostScene() {  
@@ -81,7 +81,11 @@ function lostScene() {
     if (playStageTimer.isSet())
         playStageTimer.unset();
 
+
+    //if (song.isPlaying) song.stop();
+
     if (engineObjects.length < 8) {
+        if (!isMuted) gameover_sound.play();
         state = "over";
     }
 }
