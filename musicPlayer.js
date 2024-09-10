@@ -9,7 +9,7 @@ class MusicPlayer extends Music
 
     play() {
         if (!this.isPlaying) {
-            super.playMusic(1, true);
+            super.playMusic(.5, true);
             this.isPlaying = true;
         }
     }

@@ -16,7 +16,7 @@ function titleScene() {
 }
 
 function playScene() {
-    if (!isMuted && !song1.playing()) song1.play();
+    if (!isMuted && !song.playing()) song.play();
     
     fireControl(); 
 
@@ -63,7 +63,7 @@ function endSceneText(text, color) {
 }
 
 function lostScene() {  
-    song1.stop();
+    song.stop();
     if (lostTimer.isSet()) {
         if (lostTimer.elapsed()) {
             let o = randInt(0, engineObjects.length);

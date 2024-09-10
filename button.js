@@ -53,7 +53,7 @@ class Click extends EngineObject
         if (o === soundIconBtn) {
             isMuted = !isMuted;
             if (!isMuted) sound_button.play();
-            isMuted ? song1.stop() : song1.play();
+            isMuted ? song.stop() : song.play();
         }
 
         if (o === backBtn) {

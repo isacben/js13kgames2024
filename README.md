@@ -2,8 +2,8 @@
 
 ### Todo
 
-- [ ] tutorial
-- [ ] timer that shows when the stage is going to finish
+- [x] tutorial
+- [x] timer that shows when the stage is going to finish
 - [x] fix: click to destroy the blocks
 - [x] title screen design
 - [ ] hide player in tile screen
@@ -22,11 +22,11 @@
     - [ ] hard block that can only be destroyed with one type of bullet
     - [ ] block that destroys adjacent blocks when it is destroyed
 - [x] finish screen (doesn't break after last level)
-- [ ] support powerful bullets
+- [x] support powerful bullets
     - [x] destroy multiple blocks
     - [x] spread bullets
     - [x] add power ups that enable these types of bullets
-    - [ ] randomize power ups
+    - [x] randomize power ups
 - [ ] clean Block class (physics code) and all code in general
 - [ ] add gameover screen
     - [ ] enhance gameover animation
@@ -34,7 +34,9 @@
     - [x] you can see your final score
     - [x] there is a restart button that goes to the title screen
 - [x] sound effects
-- [ ] music
+- [x] main music
+- [ ] sound for stages
+- [ ] sound/music for end screens
 - [x] build pipeline and ECT tool installation: https://github.com/fhanau/Efficient-Compression-Tool
 
 ### Done
