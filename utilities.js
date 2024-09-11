@@ -87,7 +87,8 @@ function spawnBlock() {
 function moveBlocks() {
     for (let col=0; col<columns; col++)
     for (let row=0; row<level[col].length; row++) {
-        level[col][row].pos.y = firstRow-(row)*blockSize; 
+        if (level[col][row].type < 3)
+            level[col][row].pos.y = firstRow-(row)*blockSize; 
     }
 }
 
@@ -226,10 +227,13 @@ function drawLevel(l) {
         const x = col * blockSize + blockSize / 2;
         const y = firstRow - pos * blockSize;
 
-        if (currLevel.level[col][row] === 2)
-            level[col].push(new Block(vec2(x, y), 1000, col));
+        const type = currLevel.level[col][row];
+        if (type === 3)
+            new Block(vec2(x, y), 13, col, type);
+        else if (type === 2)
+            level[col].push(new Block(vec2(x, y), 1000, col, type));
         else
-            level[col].push(new Block(vec2(x, y), pos + 1, col));
+            level[col].push(new Block(vec2(x, y), pos + 1, col, type));
     }
 }
 

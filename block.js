@@ -6,19 +6,23 @@ class Block extends EngineObject
      *  @param {Vector2} pos - World space position of the block
      *  @param {Number} num - Health value for the block
      *  @param {Number} levelCol - Column the block is positioned in the level array */
-    constructor(pos, num, levelCol)
+    constructor(pos, num, levelCol, type=1)
     {
         super(pos, vec2(blockSize));
-        this.setCollision();
-        this.mass = 0;
         this.num = num;
         this.levelCol = levelCol;
+        this.type = type;
+        this.setCollision();
+
+        if (this.type === 3)
+            this.velocity = vec2(0,-.3);
     }
+
 
     render() {
         drawRect(this.pos, this.size, blockColor); // for border
 
-        if (this.num > 100) {
+        if (this.type === 2) { // solid block
             drawRect(this.pos, vec2(blockSize*0.85,blockSize*0.85), blockColor); // block color
         } else {
             drawRect(this.pos, vec2(blockSize*0.85,blockSize*0.85), bgColor); // block color
@@ -31,6 +35,12 @@ class Block extends EngineObject
         //    this.velocity = vec2(0);
         //    return 1;
         //}
+
+        if (o === player) {
+            lostTimer.set(0.1);
+            this.destroy();
+            state = "lost";
+        }
 
         if (o.constructor.name === "Bullet") {
             score += 1000 * this.num

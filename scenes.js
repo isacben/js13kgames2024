@@ -82,7 +82,7 @@ function lostScene() {
         playStageTimer.unset();
 
 
-    //if (song.isPlaying) song.stop();
+    if (song.isPlaying) song.stop();
 
     if (engineObjects.length < 8) {
         if (!isMuted) gameover_sound.play();

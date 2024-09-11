@@ -19,7 +19,7 @@
     - [ ] spawn blocks faster
     - [ ] one block falls
     - [ ] blocks of all columns fall
-    - [ ] hard block that can only be destroyed with one type of bullet
+    - [x] hard block that can only be destroyed with one type of bullet
     - [ ] block that destroys adjacent blocks when it is destroyed
 - [x] finish screen (doesn't break after last level)
 - [x] support powerful bullets
@@ -29,14 +29,16 @@
     - [x] randomize power ups
 - [ ] clean Block class (physics code) and all code in general
 - [ ] add gameover screen
-    - [ ] enhance gameover animation
+    - [x] enhance gameover animation
     - [ ] all blocks become 13
     - [x] you can see your final score
     - [x] there is a restart button that goes to the title screen
 - [x] sound effects
 - [x] main music
-- [ ] sound for stages
+- [x] sound for stages
 - [ ] sound/music for end screens
+    - [x] game over
+    - [ ] win
 - [x] build pipeline and ECT tool installation: https://github.com/fhanau/Efficient-Compression-Tool
 
 ### Done
