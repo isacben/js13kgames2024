@@ -105,8 +105,8 @@ function gameInit() {
 
     // initial configuation
     state = "title";
-    firstStage = 7;
-    lastStage = 8;
+    firstStage = 1;
+    lastStage = 2;
     maxBlocks = 12;
     
     stage = firstStage;

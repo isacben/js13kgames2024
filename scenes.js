@@ -10,6 +10,8 @@ function titleScene() {
     if (mouseWasPressed(0)) {
         new Click(mousePos);
     }
+
+    if (song.isPlaying) song.stop();
     
     soundIconBtn.pos = vec2(-5,1);
     soundBtn.label = isMuted ? "UNMUTE" : "MUTE";
@@ -62,7 +64,7 @@ function endScene() {
     soundIconBtn.pos.x = -5;
     backBtn.pos.x = cameraPos.x;
 
-    if (song.isPlaying) song.stop();
+    //if (song.isPlaying) song.stop();
 }
 
 function endSceneText(text, color) {
