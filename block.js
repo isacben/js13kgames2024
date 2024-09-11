@@ -18,6 +18,12 @@ class Block extends EngineObject
             this.velocity = vec2(0,-.25);
     }
 
+    update() {
+        if (this.pos.y < 0)
+            this.destroy();
+
+        super.update();
+    }
 
     render() {
         drawRect(this.pos, this.size, blockColor); // for border
