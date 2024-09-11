@@ -77,7 +77,7 @@ const gameTitle = {
     ]
 }
 
-let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer, stageTimer, playStageTimer;
+let lostTimer, spawnBlockTimer, diamondTimer, hardBulletTimer, swipeTimer, fireTimer, titleTimer, stageTimer, playStageTimer, blockFallTimer;
 let level, score, state, powerUp, hardBullets, player, titleLetter, isMuted, firstStage, stage, lastStage, maxBlocks, destroyedBlocks;
 let playBtn, soundBtn, soundIconBtn, backBtn, touchStart, touchEnd;
 
@@ -101,6 +101,7 @@ function gameInit() {
     titleTimer = new Timer;
     stageTimer = new Timer;
     playStageTimer = new Timer;
+    blockFallTimer = new Timer;
 
     // initial configuation
     state = "title";

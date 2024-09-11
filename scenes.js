@@ -30,6 +30,9 @@ function playScene() {
         spawnBlockTimer.set(1);
     }
 
+    if (levelData[stage].fallingTimer && !blockFallTimer.isSet())
+        blockFallTimer.set(randInt(0, levelData[stage].fallingTimer))
+    
     spawnBlock();
     moveBlocks();
 

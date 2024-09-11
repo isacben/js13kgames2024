@@ -15,7 +15,7 @@ class Block extends EngineObject
         this.setCollision();
 
         if (this.type === 3)
-            this.velocity = vec2(0,-.3);
+            this.velocity = vec2(0,-.25);
     }
 
 

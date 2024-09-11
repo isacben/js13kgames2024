@@ -82,6 +82,16 @@ function spawnBlock() {
 
         spawnBlockTimer.set(rand(0.1, .8));
     }
+
+    if (blockFallTimer.elapsed()) {
+        const col = randInt(0, columns);
+        const pos = level[col].length;
+        const x = col * blockSize + blockSize / 2;
+        const y = firstRow - pos * blockSize;
+
+        new Block(vec2(x, y), 13, col, 3); 
+        blockFallTimer.set(randInt(0, levelData[stage].fallingTimer))
+    }
 }
 
 function moveBlocks() {
