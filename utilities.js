@@ -78,7 +78,11 @@ function spawnBlock() {
         const x = col * blockSize + blockSize / 2;
         const y = firstRow - pos * blockSize;
 
-        level[col].push(new Block(vec2(x, y), pos, col));
+        if (levelData[stage].chanceOfHardBlock)
+        if (rand(0,1) > levelData[stage].chanceOfHardBlock)
+            level[col].push(new Block(vec2(x, y), pos, col, 2));            // spawn hard blocks
+        else
+            level[col].push(new Block(vec2(x, y), pos, col));               // spawn normal blocks
 
         spawnBlockTimer.set(rand(0.1, .8));
     }
@@ -89,7 +93,7 @@ function spawnBlock() {
         const x = col * blockSize + blockSize / 2;
         const y = firstRow - pos * blockSize;
 
-        new Block(vec2(x, y), 13, col, 3); 
+        new Block(vec2(x, y), 13, col, 3);                                  // spawn falling blocks
         blockFallTimer.set(randInt(0, levelData[stage].fallingTimer))
     }
 }
