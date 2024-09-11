@@ -43,8 +43,10 @@ class Block extends EngineObject
         }
 
         if (o.constructor.name === "Bullet") {
-            score += 1000 * this.num
+            score += 100 * this.num
             this.num -= 1;
+
+            new Points(this.pos, "+100");
 
             // create hit effect
             if (this.num!=0) {
@@ -63,12 +65,15 @@ class Block extends EngineObject
                 if (!isMuted) sound_hit.play(this.pos);
             }
 
-            if ((this.num < 1 || o.type === "hard")) {
+            if (this.num < 1 || o.type === "hard" || this.type === 3) {
                 // this is how we calculate the column
                 //lines[(this.pos.x - blockSize/2) / blockSize]--;
 
                 this.destroy();
             }
+
+            if (this.type === 3)
+                score += 500;
             return 1;
         } 
     }

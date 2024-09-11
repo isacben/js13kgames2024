@@ -17,6 +17,7 @@ const sourceFiles =
     './diamond.js',
     './player.js',
     './scenes.js',
+    './points.js',
     './musicPlayer.js',
     './levels.js',
     './utilities.js',
