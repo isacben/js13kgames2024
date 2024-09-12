@@ -231,6 +231,9 @@ function tutorial() {
     
     drawTextScreen(shootText, vec2(mainCanvasSize.x/2, mainCanvasSize.y/2 + 130), fontSize, playerColor);
     drawTextScreen(hardBulletText, vec2(mainCanvasSize.x/2, mainCanvasSize.y/2 + 185), fontSize, playerColor);
+    
+    // Credits
+    drawTextScreen("2024. ISAAC BENITEZ.", vec2(mainCanvasSize.x/2, mainCanvasSize.y/2 + 585), 28, playerColor);
 }
 
 function drawLevel(l) {
