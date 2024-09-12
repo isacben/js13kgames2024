@@ -75,7 +75,7 @@ function endSceneText(text, color) {
     drawTextScreen(score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "), vec2(mainCanvasSize.x/2, mainCanvasSize.y/3), 40, playerColor);
 
     if (text === "GAME OVER")
-        drawTextScreen("> STAGE " + stage + "/10 <",vec2(mainCanvasSize.x/2, mainCanvasSize.y - 550), 35, playerColor);
+        drawTextScreen("STAGE " + stage + " / 10",vec2(mainCanvasSize.x/2, mainCanvasSize.y - 550), 35, playerColor);
 }
 
 function lostScene() {  
@@ -116,7 +116,7 @@ function lostScene() {
 }
 
 function showStage() {
-    drawTextScreen("STAGE " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/3.5), 45, playerColor);
+    drawTextScreen("STAGE " + stage + " / 10", vec2(mainCanvasSize.x/2, mainCanvasSize.y/3.5), 45, playerColor);
     
     if (stageTimer.elapsed()) {
         drawLevel(stage);
