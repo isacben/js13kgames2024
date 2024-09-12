@@ -116,7 +116,7 @@ function lostScene() {
 }
 
 function showStage() {
-    drawTextScreen("STAGE " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/5), 45, playerColor);
+    drawTextScreen("STAGE " + stage, vec2(mainCanvasSize.x/2, mainCanvasSize.y/3.5), 45, playerColor);
     
     if (stageTimer.elapsed()) {
         drawLevel(stage);

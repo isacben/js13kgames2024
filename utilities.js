@@ -25,10 +25,8 @@ function resetGame() {
     stage = firstStage;
     hardBullets = 10;
     level = Array.from(Array(columns), () => []);
-    fallingTimer.unset();
     blockFallTimer.unset();
     playStageTimer.unset();
-
     hideButtons(false)
 }
 
@@ -133,14 +131,14 @@ function fire(swiped=false) {
 
 function spawnDiamond() {
     if (diamondTimer.elapsed()) {
-        const x = randInt(1, 15);
+        const x = randInt(1, 20);
         new Diamond(vec2(x, 41));
         diamondTimer.set(2);
     }
 
     // diamond that gives you a strong bullet
     if (hardBulletTimer.elapsed()) {
-        const x = randInt(1,15);
+        const x = randInt(1,20);
         new Diamond(vec2(x, 41), 1, "hard");
         hardBulletTimer.set(randInt(levelData[stage].hardBulletInterval.min, levelData[stage].hardBulletInterval.max));
     }
