@@ -281,6 +281,6 @@ function fireControl() {
 
     if (fireTimer.elapsed() && mouseIsDown(0) && isTouchDevice) {
         fire();
-        fireTimer.set(.2);
+        fireTimer.set(.12);
     }
 }
