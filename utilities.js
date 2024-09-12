@@ -3,9 +3,9 @@
 function startGame() {
     hardBullets = 0;
 
-    if (!isMuted) sound_button.play();
     hideButtons(true);
     stageTimer.set(1.5);
+    if (!isMuted) sound_button.play();
     state = "stage";
 }
 

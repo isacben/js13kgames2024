@@ -8,6 +8,7 @@ class Wall extends EngineObject
     constructor(pos, size) {
         super(pos, size);
         this.setCollision();
+        this.wall = true;
         this.mass = 0;
         this.color = new Color(0, 0, 0, 0); // make invisible
     }

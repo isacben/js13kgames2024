@@ -17,7 +17,7 @@ class Points extends EngineObject
 
     update() {
         if (!this.time.isSet())
-            this.time.set(.4);
+            this.time.set(.5);
 
         if (this.time.isSet()) {
             this.color.a = 1-this.time.getPercent();

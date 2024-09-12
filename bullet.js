@@ -11,6 +11,7 @@ class Bullet extends EngineObject
         this.velocity = direction;
         this.color = bulletColor;
         this.type = type;
+        this.bullet = true;
         this.setCollision();
     }
 
@@ -27,11 +28,11 @@ class Bullet extends EngineObject
     }
 
     collideWithObject(o) {
-        if (this.type === "normal" && o.constructor.name === "Block"){
+        if (this.type === "normal" && o.block){
             this.destroy();
         }
 
-        if (o.constructor.name === "Wall") {
+        if (o.wall) {
             this.sparkles();
             this.destroy();
         }

@@ -12,6 +12,7 @@ class Block extends EngineObject
         this.num = num;
         this.levelCol = levelCol;
         this.type = type;
+        this.block = true;
         this.setCollision();
 
         if (this.type === 3)
@@ -50,7 +51,7 @@ class Block extends EngineObject
             state = "lost";
         }
 
-        if (o.constructor.name === "Bullet") {
+        if (o.bullet) {
             let p = 0;
             this.num -= 1;
 
