@@ -9,7 +9,7 @@ class Points extends EngineObject
         super(pos);
         this.points = points;
         //this.color = new Color(0.254, 0.917, 0.831);
-        this.color = new Color(1,1,1);
+        this.color = new Color(0.984, 1, 0.07);
 
         this.time = new Timer;
         this.velocity = vec2(0,.2);

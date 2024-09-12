@@ -12,7 +12,7 @@ function startGame() {
 function isGameOver() {
     for (let i=0; i<columns; i++) {
         if (level[i].length > maxBlocks) {
-            lostTimer.set(0.1);
+            lostTimer.set(0.8);
             state = "lost";
         }
     }
@@ -22,7 +22,6 @@ function resetGame() {
     score = 0;
     powerUp = 0;
     stage = firstStage;
-    destroyedBlocks = 0;
     hardBullets = 10;
     level = Array.from(Array(columns), () => []);
     hideButtons(false)
@@ -47,8 +46,6 @@ function clearStage() {
 
     if (stageTimer.elapsed()) {
         stageTimer.set(1.5);
-        destroyedBlocks = 0;
-    
         
         if (stage === lastStage) {
             state = "win";
@@ -78,11 +75,11 @@ function spawnBlock() {
         const x = col * blockSize + blockSize / 2;
         const y = firstRow - pos * blockSize;
 
-        if (levelData[stage].chanceOfHardBlock)
-        if (rand(0,1) > levelData[stage].chanceOfHardBlock)
-            level[col].push(new Block(vec2(x, y), pos, col, 2));            // spawn hard blocks
-        else
-            level[col].push(new Block(vec2(x, y), pos, col));               // spawn normal blocks
+        if (levelData[stage].chanceOfHardBlock) {
+            if (rand(0,1) > levelData[stage].chanceOfHardBlock)
+                level[col].push(new Block(vec2(x, y), 1000, col, 2));            // spawn hard blocks
+        } else
+            level[col].push(new Block(vec2(x, y), pos, col, 1));               // spawn normal blocks
 
         spawnBlockTimer.set(rand(0.1, .8));
     }

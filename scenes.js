@@ -1,6 +1,9 @@
 'use strict';
 
 function titleScene() {
+    if (player.destroyed)
+        player = new Player(playerInit);
+
     fireControl();
 
     if (keyWasPressed("Enter")) {
@@ -73,13 +76,19 @@ function endSceneText(text, color) {
 }
 
 function lostScene() {  
-    if (lostTimer.isSet()) {
-        if (lostTimer.elapsed()) {
-            let o = randInt(0, engineObjects.length);
-            if (engineObjects[o].constructor.name === "Block") {
-                engineObjects[o].destroy();
-                lostTimer.set(0.001);
-            }
+    //if (lostTimer.isSet()) {
+    //    if (lostTimer.elapsed()) {
+    //        let o = randInt(0, engineObjects.length);
+    //        if (engineObjects[o].constructor.name === "Block") {
+    //            engineObjects[o].destroy();
+    //            lostTimer.set(0.001);
+    //        }
+    //    }
+    //}
+
+    for (let col=0; col<columns; col++){
+        for (let row=0; row<level[col].length; row++) {
+            level[col][row].destroy();
         }
     }
 
@@ -89,7 +98,7 @@ function lostScene() {
 
     if (song.isPlaying) song.stop();
 
-    if (engineObjects.length < 8) {
+    if (lostTimer.elapsed()) {
         if (!isMuted) gameover_sound.play();
         state = "over";
     }
