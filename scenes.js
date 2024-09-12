@@ -91,7 +91,7 @@ function lostScene() {
 
     for (let col=0; col<columns; col++){
         for (let row=0; row<level[col].length; row++) {
-            level[col][row].destroy();
+            level[col][row].num = 13;
         }
     }
 
@@ -102,8 +102,16 @@ function lostScene() {
     if (song.isPlaying) song.stop();
 
     if (lostTimer.elapsed()) {
-        if (!isMuted) gameover_sound.play();
-        state = "over";
+        for (let col=0; col<columns; col++){
+            for (let row=0; row<level[col].length; row++) {
+                level[col][row].destroy();
+            }
+        }
+
+        if (stageTimer.elapsed()) {
+            if (!isMuted) gameover_sound.play();
+            state = "over";
+        }
     }
 }
 

@@ -45,6 +45,8 @@ class Block extends EngineObject
         if (o === player) {
             lostTimer.set(0.1);
             this.destroy();
+            lostTimer.set(1);
+            stageTimer.set(2);
             state = "lost";
         }
 

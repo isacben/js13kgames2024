@@ -12,7 +12,8 @@ function startGame() {
 function isGameOver() {
     for (let i=0; i<columns; i++) {
         if (level[i].length > maxBlocks) {
-            lostTimer.set(0.8);
+            lostTimer.set(1);
+            stageTimer.set(2);
             state = "lost";
         }
     }
@@ -78,8 +79,9 @@ function spawnBlock() {
         if (levelData[stage].chanceOfHardBlock) {
             if (rand(0,1) > levelData[stage].chanceOfHardBlock)
                 level[col].push(new Block(vec2(x, y), 1000, col, 2));            // spawn hard blocks
-        } else
-            level[col].push(new Block(vec2(x, y), pos, col, 1));               // spawn normal blocks
+        } 
+
+        level[col].push(new Block(vec2(x, y), pos, col, 1));               // spawn normal blocks
 
         spawnBlockTimer.set(rand(0.1, .8));
     }
