@@ -28,7 +28,7 @@ class Click extends EngineObject
      *  @param {Vector2} pos - World space position of the click */
     constructor(pos) {
         super(pos, vec2(.5), tile(1));
-        this.color = blockColor;
+        this.color = new Color(0,0,0,0); //transparent
         this.setCollision();
         this.destroyTimer = new Timer(.1);
     }

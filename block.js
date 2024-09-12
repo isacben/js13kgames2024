@@ -51,7 +51,6 @@ class Block extends EngineObject
         }
 
         if (o.constructor.name === "Bullet") {
-            let totalScore = 100;
             let p = 0;
             this.num -= 1;
 
@@ -73,12 +72,12 @@ class Block extends EngineObject
             }
 
             if (this.type === 3)
-                p += 500;
+                p += 600;
 
             if (this.num < 1 || o.type === "hard" || this.type === 3) {
                 // this is how we calculate the column
                 //lines[(this.pos.x - blockSize/2) / blockSize]--;
-                p += 100;
+                p += 200;
 
                 this.destroy();
                 new Points(this.pos, "+" + p);

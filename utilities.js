@@ -25,6 +25,10 @@ function resetGame() {
     stage = firstStage;
     hardBullets = 10;
     level = Array.from(Array(columns), () => []);
+    fallingTimer.unset();
+    blockFallTimer.unset();
+    playStageTimer.unset();
+
     hideButtons(false)
 }
 

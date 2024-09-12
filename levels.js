@@ -94,11 +94,10 @@ const levelData = {
             [1,2,1]
         ],
         hardBulletInterval: {
-            min: 10,
-            max: 15
+            min: 8,
+            max: 13
         },
-        fallingTimer: 0,
-        chanceOfHardBlock: .8,
+        chanceOfHardBlock: .9,
         time: 40
     },
     6: {
